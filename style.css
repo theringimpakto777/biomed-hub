@@ -618,3 +618,132 @@ body {
   border-radius: 6px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
+/* ============================================================
+   10. MOBILE RESPONSIVE OPTIMIZATIONS (Smartphones & Tablets)
+   ============================================================ */
+@media (max-width: 768px) {
+  /* Layout & Spacing */
+  body {
+    font-size: 14px;
+  }
+
+  .container {
+    padding: 0 0.5rem;
+    margin: 0.75rem auto;
+  }
+
+  /* Navigation Bar */
+  .navbar {
+    padding: 0.75rem 1rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .user-panel {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .user-badge {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.5rem;
+    max-width: 70%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* KPI Grid */
+  .kpi-grid {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+
+  .kpi-card {
+    padding: 0.85rem;
+  }
+
+  .kpi-val {
+    font-size: 1.4rem;
+  }
+
+  /* Toolbar & Search */
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .toolbar-search {
+    flex-direction: column;
+    min-width: 100%;
+  }
+
+  .toolbar-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .toolbar-actions .btn {
+    justify-content: center;
+    font-size: 0.82rem;
+    padding: 0.5rem 0.4rem;
+  }
+
+  /* Form & Modal Layouts */
+  .form-row,
+  .upload-row {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .modal-card {
+    width: 95%;
+    max-height: 92vh;
+    padding: 1.1rem;
+    margin: auto;
+  }
+
+  .dossier-grid {
+    grid-template-columns: 1fr;
+    padding: 0.85rem;
+  }
+
+  .dossier-media-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* IT Banner Mobile */
+  .it-banner {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.85rem;
+  }
+
+  .it-banner-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .it-banner-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Responsive Horizontal Scroll Table */
+  .table-card {
+    border-radius: 6px;
+    margin: 0 -0.5rem;
+    border-left: none;
+    border-right: none;
+  }
+
+  .data-table th, 
+  .data-table td {
+    padding: 0.65rem 0.55rem;
+    font-size: 0.8rem;
+  }
+}
