@@ -26,7 +26,7 @@ import {
 
 // 1. FIREBASE CONFIGURATION (biomed-hub-b028c)
 const firebaseConfig = {
-  apiKey: "AIzaSyDGOCGKNFLPX1GMWeVIqG0GXsm9tSeWOYM",
+  apiKey: "AIzaSyCkBywEWXulan24XfxeQWRUuEG9VxmEMVc",
   authDomain: "biomed-hub-b028c.firebaseapp.com",
   projectId: "biomed-hub-b028c",
   storageBucket: "biomed-hub-b028c.firebasestorage.app",
