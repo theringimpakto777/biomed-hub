@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Biomedical Asset & Parts Hub</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ========================================================
+       SECTION 1: AUTHENTICATION PORTAL (LOGIN & SIGN UP)
+       ======================================================== -->
+  <div id="authScreen" class="auth-wrapper">
+    <div class="auth-card">
+
+      <!-- Header / Logo -->
+      <div class="auth-header">
+        <span class="auth-icon">🔬</span>
+        <h2>Biomedical Asset Registry</h2>
+        <p>Clinical Engineering Equipment & Spare Parts Hub</p>
+      </div>
+
+      <!-- Tab Switcher: Login vs Sign Up -->
+      <div class="auth-tabs">
+        <button id="tabLoginBtn" class="tab-btn active">Sign In</button>
+        <button id="tabSignupBtn" class="tab-btn">Create Account</button>
+      </div>
+
+      <!-- Alert Box for Errors or Success messages -->
+      <div id="authAlert" class="auth-alert hidden"></div>
+
+      <!-- FORM A: LOGIN FORM -->
+      <form id="loginForm" class="auth-form">
+        <div class="form-group">
+          <label for="loginEmail">Email Address</label>
+          <input type="email" id="loginEmail" placeholder="e.g., tech@hospital.org" required />
+        </div>
+
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" placeholder="••••••••" required />
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+
+        <p class="login-help-note">
+          Forgot your password or username? Please contact <strong>IT Support</strong> for account recovery.
+        </p>
+
+        <!-- Quick-Fill Shortcuts (Clinical Staff Only; IT Demo Removed for Security) -->
+        <div class="quick-login-section">
+          <span class="quick-title">Quick Demo Logins (Clinical Roles):</span>
+          <div class="quick-buttons">
+            <button type="button" class="btn-chip" onclick="fillDemo('staff')">🧰 Biomed Staff</button>
+            <button type="button" class="btn-chip" onclick="fillDemo('supervisor')">🛡️ Supervisor</button>
+          </div>
+        </div>
+      </form>
+
+      <!-- FORM B: SIGN UP FORM (IT Role Excluded) -->
+      <form id="signupForm" class="auth-form hidden">
+        <div class="form-group">
+          <label for="signupName">Full Name</label>
+          <input type="text" id="signupName" placeholder="e.g., Eng. Tariq Mansoor" required />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="signupBadge">Staff / Badge ID</label>
+            <input type="text" id="signupBadge" placeholder="e.g., BME-402" required />
+          </div>
+          <div class="form-group flex-1">
+            <label for="signupRole">Department Role</label>
+            <select id="signupRole" required>
+              <option value="Biomed Staff">🧰 Biomed Staff (Tech)</option>
+              <option value="Biomed Supervisor">🛡️ Biomed Supervisor</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="signupEmail">Work Email</label>
+          <input type="email" id="signupEmail" placeholder="tariq@hospital.org" required />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="signupPassword">Password</label>
+            <input type="password" id="signupPassword" placeholder="Minimum 6 characters" required />
+          </div>
+          <div class="form-group flex-1">
+            <label for="signupConfirmPassword">Confirm Password</label>
+            <input type="password" id="signupConfirmPassword" placeholder="Repeat password" required />
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Register Account</button>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ========================================================
+       SECTION 2: MAIN INVENTORY WORKSPACE
+       ======================================================== -->
+  <div id="mainApp" class="hidden">
+
+    <!-- Top Navigation Bar -->
+    <header class="navbar">
+      <div class="brand">
+        <span class="brand-icon">🏥</span>
+        <div>
+          <h1>Biomed Asset Hub</h1>
+          <span class="subtitle">Clinical Engineering Registry</span>
+        </div>
+      </div>
+      <div class="user-panel">
+        <div id="userBadge" class="user-badge"></div>
+        <button id="logoutBtn" class="btn btn-danger-outline">🚪 Logout</button>
+      </div>
+    </header>
+
+    <main class="container">
+
+      <!-- IT Support Banner (Visible ONLY when logged in as IT Support) -->
+      <section id="itAdminBanner" class="it-banner hidden">
+        <div>
+          <h3>💻 IT Administration Console Active</h3>
+          <p>Read-only access to equipment data. Manage accounts, reset passwords, or export system backups below.</p>
+        </div>
+        <div class="it-banner-actions">
+          <button class="btn btn-it btn-sm" onclick="exportDatabaseBackup()">💾 Backup Database</button>
+          <button class="btn btn-primary btn-sm" onclick="openAccountsModal()">👥 Manage Accounts & Passwords</button>
+          <button class="btn btn-outline btn-sm" onclick="runSystemDiagnostics()">⚡ Diagnostics</button>
+        </div>
+      </section>
+
+      <!-- KPI Metric Counters -->
+      <section class="kpi-grid">
+        <div class="kpi-card">
+          <span class="kpi-label">Active Machines</span>
+          <span id="kpiMachines" class="kpi-val">0</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Workshop Parts Stock</span>
+          <span id="kpiParts" class="kpi-val">0</span>
+        </div>
+        <div class="kpi-card alert-warning">
+          <span class="kpi-label">Pending Verification</span>
+          <span id="kpiPending" class="kpi-val">0</span>
+        </div>
+      </section>
+
+      <!-- Toolbar: Search, Filters, and Add Buttons -->
+      <section class="toolbar">
+        <div class="toolbar-search">
+          <input type="text" id="searchInput" placeholder="🔍 Search Biomed Tag, Serial No, device, SKU, or room..." />
+          <select id="statusFilter">
+            <option value="ALL">All Statuses</option>
+            <option value="Pending">🟡 Pending Verification</option>
+            <option value="Approved">🟢 Approved</option>
+            <option value="Needs Clarification">🟠 Needs Clarification</option>
+          </select>
+        </div>
+
+        <div class="toolbar-actions" id="biomedActionButtons">
+          <button id="btnAddMachine" class="btn btn-primary">➕ Add Machine</button>
+          <button id="btnAddPart" class="btn btn-secondary">🔩 Add Spare Part</button>
+        </div>
+      </section>
+
+      <!-- Main Data Table -->
+      <section class="table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Biomed Tag</th>
+              <th>Category</th>
+              <th>Item / Model</th>
+              <th>Attachments</th>
+              <th>Factory SN / SKU</th>
+              <th>Location / Bin</th>
+              <th>Status & Notes</th>
+              <th class="actions-header">Verification & Actions</th>
+            </tr>
+          </thead>
+          <tbody id="inventoryTableBody">
+            <!-- Populated dynamically -->
+          </tbody>
+        </table>
+        <div id="emptyNotice" class="empty-notice hidden">No inventory records match your criteria.</div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ========================================================
+       MODAL 1: ADD / EDIT MACHINE & SPARE PART FORM
+       ======================================================== -->
+  <div id="itemModal" class="modal-overlay hidden">
+    <div class="modal-card modal-lg">
+      <div class="modal-header">
+        <h3 id="modalTitle">Register Asset</h3>
+        <button id="closeItemModalBtn" class="close-x">&times;</button>
+      </div>
+
+      <form id="itemForm">
+        <input type="hidden" id="formItemType" value="Machine" />
+        <input type="hidden" id="editItemId" value="" />
+
+        <!-- BIOMED ASSET TAG -->
+        <div class="form-group highlight-group">
+          <label for="inputBiomedTag">🏷️ Biomed Asset Tag (Internal Barcode/Sticker ID)</label>
+          <input type="text" id="inputBiomedTag" placeholder="e.g., BME-2026-0142" required />
+        </div>
+
+        <div class="form-group">
+          <label id="lblItemName" for="inputName">Device / Part Name</label>
+          <input type="text" id="inputName" placeholder="e.g., Mechanical Ventilator" required />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label id="lblIdentifier" for="inputIdentifier">Factory Serial Number</label>
+            <input type="text" id="inputIdentifier" placeholder="e.g., SN-88410" required />
+          </div>
+          <div class="form-group flex-1">
+            <label for="inputLocation">Department or Storage Bin</label>
+            <input type="text" id="inputLocation" placeholder="e.g., ICU Bed 04 / Bin A-2" required />
+          </div>
+        </div>
+
+        <!-- FILE & CAMERA ATTACHMENTS -->
+        <div class="form-row upload-row">
+          <div class="form-group flex-1 file-upload-box">
+            <label id="lblPhotoUpload">📷 Equipment Photo</label>
+            <input type="file" id="inputCameraCapture" accept="image/*" capture="environment" class="hidden" />
+            <input type="file" id="inputPhoto" accept="image/*" class="hidden" />
+
+            <div class="camera-action-buttons">
+              <button type="button" id="btnTriggerCamera" class="btn btn-sm btn-camera">📸 Take Photo</button>
+              <button type="button" id="btnTriggerGallery" class="btn btn-sm btn-outline">🖼️ Upload File</button>
+            </div>
+
+            <div id="photoPreviewContainer" class="preview-box hidden">
+              <img id="photoPreviewImg" src="" alt="Item Preview" />
+              <button type="button" id="removePhotoBtn" class="btn-remove-file">✖ Remove Photo</button>
+            </div>
+          </div>
+
+          <div id="pdfUploadGroup" class="form-group flex-1 file-upload-box">
+            <label for="inputPdf">📄 Calibration / Service Report (PDF)</label>
+            <input type="file" id="inputPdf" accept="application/pdf" />
+            <div id="pdfPreviewContainer" class="preview-box hidden">
+              <span class="pdf-tag">📑 <span id="pdfFileName">report.pdf</span></span>
+              <button type="button" id="removePdfBtn" class="btn-remove-file">✖ Remove PDF</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="inputRemarks">Technical Notes / Specs</label>
+          <textarea id="inputRemarks" rows="2" placeholder="OEM, cable type, voltage, condition, calibration notes..."></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="cancelItemModalBtn" class="btn btn-outline">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save to System</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL 2: COMPLETE ASSET DETAILS & DOSSIER PREVIEW
+       ======================================================== -->
+  <div id="assetDetailModal" class="modal-overlay hidden">
+    <div class="modal-card modal-lg detail-dossier-card">
+      <div class="modal-header">
+        <div class="dossier-header-title">
+          <span id="detailTypeBadge" class="badge"></span>
+          <h3 id="detailAssetName">Asset Specification</h3>
+        </div>
+        <button id="closeDetailModalBtn" class="close-x">&times;</button>
+      </div>
+
+      <div class="dossier-body">
+        <div class="dossier-grid">
+          <div class="dossier-item">
+            <span class="dossier-label">🏷️ Biomed Tag</span>
+            <strong id="detailBiomedTag" class="dossier-val text-primary font-mono">-</strong>
+          </div>
+          <div class="dossier-item">
+            <span class="dossier-label">🔢 Factory Serial / SKU</span>
+            <strong id="detailIdentifier" class="dossier-val font-mono">-</strong>
+          </div>
+          <div class="dossier-item">
+            <span class="dossier-label">📍 Location / Storage</span>
+            <strong id="detailLocation" class="dossier-val">-</strong>
+          </div>
+          <div class="dossier-item">
+            <span class="dossier-label">🛡️ Status</span>
+            <div id="detailStatusContainer"></div>
+          </div>
+          <div class="dossier-item">
+            <span class="dossier-label">👤 Registered By</span>
+            <span id="detailSubmittedBy" class="dossier-val text-muted">-</span>
+          </div>
+          <div class="dossier-item">
+            <span class="dossier-label">📝 Clinical / Tech Notes</span>
+            <p id="detailNotes" class="dossier-notes-box">-</p>
+          </div>
+        </div>
+
+        <div class="dossier-media-section">
+          <h4>📁 Attached Photo & Calibration Report</h4>
+          <div class="dossier-media-grid">
+            <div class="media-card">
+              <span class="media-title">📷 Equipment Photo</span>
+              <div id="detailPhotoContainer" class="media-content"></div>
+            </div>
+            <div id="detailPdfCard" class="media-card">
+              <span class="media-title">📄 Service / Calibration Report</span>
+              <div id="detailPdfContainer" class="media-content"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" id="detailModalFooter">
+        <button type="button" id="closeDetailModalBottomBtn" class="btn btn-outline">Close Dossier</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL 3: IN-APP LIVE CAMERA VIEWFINDER (DESKTOP)
+       ======================================================== -->
+  <div id="liveCameraModal" class="modal-overlay hidden">
+    <div class="modal-card live-camera-card">
+      <div class="modal-header">
+        <h3>📸 Live Camera Viewfinder</h3>
+        <button id="closeLiveCameraBtn" class="close-x">&times;</button>
+      </div>
+      <div class="live-camera-body">
+        <video id="cameraVideo" autoplay playsinline></video>
+        <canvas id="cameraCanvas" class="hidden"></canvas>
+      </div>
+      <div class="modal-footer" style="justify-content: center; gap: 1rem;">
+        <button type="button" id="btnCancelCamera" class="btn btn-outline">Cancel</button>
+        <button type="button" id="btnCaptureShutter" class="btn btn-primary">📷 Capture Snap</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL 4: SUPERVISOR CLARIFICATION DIALOG
+       ======================================================== -->
+  <div id="clarifyModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>💬 Request Clarification from Tech</h3>
+        <button id="closeClarifyModalBtn" class="close-x">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">
+          State what details the registering technician needs to fix or verify:
+        </p>
+        <textarea id="clarifyNoteInput" rows="3" placeholder="Type clarification message here..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="cancelClarifyBtn" class="btn btn-outline">Cancel</button>
+        <button type="button" id="submitClarifyBtn" class="btn btn-warning">Flag for Clarification</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL 5: IT REGISTERED ACCOUNTS & PASSWORD MANAGER
+       ======================================================== -->
+  <div id="accountsModal" class="modal-overlay hidden">
+    <div class="modal-card modal-lg">
+      <div class="modal-header">
+        <h3>👥 Department Accounts & Password Manager (IT Only)</h3>
+        <button id="closeAccountsModalBtn" class="close-x">&times;</button>
+      </div>
+      <div class="modal-body">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Badge ID</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th style="text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="accountsTableBody">
+            <!-- Populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="closeAccountsBtn" class="btn btn-outline">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL 6: IT USER EDIT & PASSWORD RESET FORM
+       ======================================================== -->
+  <div id="itUserEditModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>🛠️ IT Account & Password Editor</h3>
+        <button id="closeItUserEditModalBtn" class="close-x">&times;</button>
+      </div>
+      <form id="itUserEditForm">
+        <input type="hidden" id="itEditUserOriginalEmail" value="" />
+        <div class="form-group">
+          <label for="itEditName">Full Name</label>
+          <input type="text" id="itEditName" required />
+        </div>
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="itEditBadge">Staff / Badge ID</label>
+            <input type="text" id="itEditBadge" required />
+          </div>
+          <div class="form-group flex-1">
+            <label for="itEditRole">Department Role</label>
+            <select id="itEditRole" required>
+              <option value="Biomed Staff">🧰 Biomed Staff</option>
+              <option value="Biomed Supervisor">🛡️ Biomed Supervisor</option>
+              <option value="IT Support">💻 IT Support</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="itEditEmail">Work Email</label>
+          <input type="email" id="itEditEmail" required />
+        </div>
+        <div class="form-group highlight-group">
+          <label for="itEditPassword">🔑 Set / Reset Password</label>
+          <input type="text" id="itEditPassword" placeholder="Enter new password" required />
+          <small style="color: var(--text-muted); display: block; margin-top: 0.2rem;">Visible to IT to communicate credentials to the user.</small>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="cancelItUserEditBtn" class="btn btn-outline">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL 7: PHOTO LIGHTBOX VIEWER
+       ======================================================== -->
+  <div id="imageViewerModal" class="modal-overlay hidden">
+    <div class="modal-card photo-lightbox-card">
+      <div class="modal-header">
+        <h3 id="imageViewerTitle">Device Photo</h3>
+        <button id="closeImageViewerBtn" class="close-x">&times;</button>
+      </div>
+      <div class="image-viewer-body">
+        <img id="imageViewerImg" src="" alt="High Resolution Photo" />
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
