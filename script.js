@@ -519,10 +519,18 @@ const filteredList = inventory.filter(item => {
       `;
     }
 
+  // Format Stock count display
+    const stockDisplay = item.type === "Part" 
+      ? `<span class="badge" style="background:#e0e7ff; color:#3730a3; font-weight:700;">${item.quantity ?? 1}</span>`
+      : `<span style="color:var(--text-muted); font-size:0.8rem;">N/A</span>`;
+
+    // Icon indicator based on type
+    const tagIcon = item.type === "Part" ? "🔩" : "🏷️";
+
     tr.innerHTML = `
       <td>
-        <span class="badge-biomed-tag" onclick="openAssetDetailModal('${item.id}')" title="Click to view full dossier">
-          🏷️ ${item.biomedTag || "NO TAG"}
+        <span class="badge-biomed-tag" onclick="openAssetDetailModal('${item.id}')" title="Click to view details">
+          ${tagIcon} ${item.biomedTag || "NO TAG"}
         </span>
       </td>
       <td><span class="badge ${typeClass}">${item.type}</span></td>
@@ -530,14 +538,12 @@ const filteredList = inventory.filter(item => {
         <strong class="clickable-asset-title" onclick="openAssetDetailModal('${item.id}')" title="Click to view details">
           ${item.name}
         </strong>
-        ${item.type === "Part" && item.quantity !== null && item.quantity !== undefined 
-          ? `<span class="badge" style="background:#e0e7ff; color:#3730a3; margin-top:2px;">Stock: ${item.quantity}</span>` 
-          : ""}
         <span class="item-notes">${item.notes || "No technical notes."}</span>
       </td>
       <td>${attachmentsHtml}</td>
-      <td><code>${item.identifier}</code></td>
-      <td>${item.location}</td>
+      <td><code>${item.identifier || "—"}</code></td>
+      <td>${item.location || "—"}</td>
+      <td style="text-align: center;">${stockDisplay}</td>
       <td>
         <span class="badge ${statusClass}">${item.status}</span>
         <span class="item-notes">Sub by: ${item.submittedBy}</span>
