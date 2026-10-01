@@ -196,9 +196,9 @@
         <input type="hidden" id="editItemId" />
         <input type="hidden" id="formItemType" value="Machine" />
 
-        <div class="form-row">
+       <div class="form-row">
           <div class="form-group flex-1">
-            <label for="inputBiomedTag">Hospital Biomed Tag</label>
+            <label id="lblBiomedTag" for="inputBiomedTag">Hospital Biomed Tag</label>
             <input type="text" id="inputBiomedTag" placeholder="e.g. BME-2026-01" required />
           </div>
           <div class="form-group flex-1">
@@ -213,8 +213,13 @@
             <input type="text" id="inputName" placeholder="e.g. Draeger Fabius Plus" required />
           </div>
           <div class="form-group flex-1">
-            <label for="inputLocation">Physical Location / Ward</label>
+            <label id="lblLocation" for="inputLocation">Physical Location / Ward</label>
             <input type="text" id="inputLocation" placeholder="e.g. OR-4, ICU-East" required />
+          </div>
+          <!-- Stock Quantity (Visible only for Spare Parts) -->
+          <div id="partQuantityGroup" class="form-group flex-1 hidden">
+            <label for="inputQuantity">Quantity in Stock</label>
+            <input type="number" id="inputQuantity" min="0" placeholder="e.g. 5" value="1" />
           </div>
         </div>
 
