@@ -197,6 +197,34 @@
         <input type="hidden" id="editItemId" />
         <input type="hidden" id="formItemType" value="Machine" />
 
+        <!-- Row 1: Part Number & Description -->
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label id="lblBiomedTag" for="inputBiomedTag">Hospital Asset / Biomed Tag</label>
+            <input type="text" id="inputBiomedTag" placeholder="e.g. BME-2026-01" required />
+          </div>
+          <div class="form-group flex-1">
+            <label id="lblItemName" for="inputName">Machine / Model Name</label>
+            <input type="text" id="inputName" placeholder="e.g. Draeger Fabius Plus" required />
+          </div>
+        </div>
+
+        <!-- Row 2: Serial / Compatibility, Location, Quantity -->
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label id="lblIdentifier" for="inputIdentifier">Factory Serial Number (SN)</label>
+            <input type="text" id="inputIdentifier" placeholder="e.g. SN-99410" required />
+          </div>
+          <div class="form-group flex-1">
+            <label id="lblLocation" for="inputLocation">Physical Location / Ward</label>
+            <input type="text" id="inputLocation" placeholder="e.g. OR-4, ICU-East" required />
+          </div>
+          <div id="partQuantityGroup" class="form-group hidden" style="max-width: 120px;">
+            <label for="inputQuantity">Stock Qty</label>
+            <input type="number" id="inputQuantity" min="0" placeholder="1" value="1" />
+          </div>
+        </div>
+
        <div class="form-row">
           <div class="form-group flex-1">
             <label id="lblBiomedTag" for="inputBiomedTag">Hospital Biomed Tag</label>
