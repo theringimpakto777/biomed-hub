@@ -21,7 +21,8 @@ import {
   getDocs, 
   onSnapshot, 
   deleteDoc, 
-  updateDoc 
+  updateDoc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // 1. FIREBASE CONFIGURATION (biomed-hub-b028c)
@@ -37,6 +38,14 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+const INTERNAL_DOMAIN = "@hospital.internal";
+
+// Helper to convert Badge ID to silent internal Firebase identity
+function badgeToInternalEmail(badge) {
+  const cleaned = (badge || "").trim().toLowerCase().replace(/\s+/g, "");
+  return cleaned.includes("@") ? cleaned : `${cleaned}${INTERNAL_DOMAIN}`;
+}
 
 // 2. GLOBAL STATE
 let inventory = [];
@@ -58,13 +67,13 @@ const loginForm = document.getElementById("loginForm");
 const signupForm = document.getElementById("signupForm");
 const authAlert = document.getElementById("authAlert");
 
-const loginEmail = document.getElementById("loginEmail");
+// Badge-based auth inputs
+const loginBadge = document.getElementById("loginBadge");
 const loginPassword = document.getElementById("loginPassword");
 
 const signupName = document.getElementById("signupName");
 const signupBadge = document.getElementById("signupBadge");
 const signupRole = document.getElementById("signupRole");
-const signupEmail = document.getElementById("signupEmail");
 const signupPassword = document.getElementById("signupPassword");
 const signupConfirmPassword = document.getElementById("signupConfirmPassword");
 
@@ -166,6 +175,7 @@ function showAuthAlert(message, type = "error") {
   authAlert.className = `auth-alert ${type}`;
   authAlert.classList.remove("hidden");
 }
+
 function clearAuthAlert() {
   if (!authAlert) return;
   authAlert.textContent = "";
@@ -190,42 +200,49 @@ if (tabLoginBtn && tabSignupBtn) {
   });
 }
 
-// Sign In via Firebase Cloud Auth
+// Sign In via Badge ID
 if (loginForm) {
   loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     clearAuthAlert();
 
-    const email = loginEmail.value.trim().toLowerCase();
+    const rawBadge = loginBadge.value.trim().toUpperCase();
     const password = loginPassword.value.trim();
+    const silentEmail = badgeToInternalEmail(rawBadge);
 
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, silentEmail, password);
       const uid = userCredential.user.uid;
 
-      // Fetch user profile from Firestore
       const userDoc = await getDoc(doc(db, "users", uid));
       if (userDoc.exists()) {
         currentUser = userDoc.data();
       } else {
-        // Fallback default for IT Admin
         currentUser = {
-          name: "System Administrator",
-          badge: "IT-ADMIN-01",
-          email: email,
-          role: "IT Support"
+          name: rawBadge.startsWith("IT") ? "System Administrator" : "Biomedical Specialist",
+          badge: rawBadge,
+          email: silentEmail,
+          role: rawBadge.startsWith("IT") ? "IT Support" : "Biomed Staff"
         };
       }
 
       loginForm.reset();
       launchMainApp();
     } catch (err) {
-      showAuthAlert(err.message.replace("Firebase: ", ""), "error");
+      if (
+        err.code === "auth/invalid-credential" || 
+        err.code === "auth/user-not-found" || 
+        err.code === "auth/wrong-password"
+      ) {
+        showAuthAlert("Invalid Badge ID or Password.", "error");
+      } else {
+        showAuthAlert(err.message.replace("Firebase: ", ""), "error");
+      }
     }
   });
 }
 
-// Sign Up via Firebase Cloud Auth & Cloud User Profile
+// Sign Up via Badge ID (No work email field needed)
 if (signupForm) {
   signupForm.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -234,7 +251,6 @@ if (signupForm) {
     const name = signupName.value.trim();
     const badge = signupBadge.value.trim().toUpperCase();
     const role = signupRole.value;
-    const email = signupEmail.value.trim().toLowerCase();
     const password = signupPassword.value.trim();
     const confirmPassword = signupConfirmPassword.value.trim();
 
@@ -247,32 +263,45 @@ if (signupForm) {
       return;
     }
 
+    const silentEmail = badgeToInternalEmail(badge);
+
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, silentEmail, password);
       const uid = userCredential.user.uid;
 
-      const userData = { uid, name, badge, role, email };
+      const userData = { 
+        uid, 
+        name, 
+        badge, 
+        role, 
+        email: silentEmail,
+        createdAt: serverTimestamp()
+      };
       await setDoc(doc(db, "users", uid), userData);
 
       signupForm.reset();
-      showAuthAlert("Account registered in cloud! You can now sign in on any device.", "success");
+      showAuthAlert(`Badge ${badge} registered successfully! You can now sign in.`, "success");
       tabLoginBtn.click();
-      loginEmail.value = email;
+      if (loginBadge) loginBadge.value = badge;
     } catch (err) {
-      showAuthAlert(err.message.replace("Firebase: ", ""), "error");
+      if (err.code === "auth/email-already-in-use") {
+        showAuthAlert(`Badge ID ${badge} is already registered.`, "error");
+      } else {
+        showAuthAlert(err.message.replace("Firebase: ", ""), "error");
+      }
     }
   });
 }
 
-// Clinical Quick Demo Shortcuts
+// Clinical Quick Demo Shortcuts (Using Badge IDs)
 window.fillDemo = function(roleKey) {
   if (tabLoginBtn) tabLoginBtn.click();
   if (roleKey === "staff") {
-    loginEmail.value = "tariq@hospital.org";
-    loginPassword.value = "Password123";
+    if (loginBadge) loginBadge.value = "BME-402";
+    if (loginPassword) loginPassword.value = "Password123";
   } else if (roleKey === "supervisor") {
-    loginEmail.value = "sarah@hospital.org";
-    loginPassword.value = "Password123";
+    if (loginBadge) loginBadge.value = "BME-SUPER";
+    if (loginPassword) loginPassword.value = "Password123";
   }
 };
 
@@ -282,8 +311,15 @@ onAuthStateChanged(auth, async (user) => {
     const userDoc = await getDoc(doc(db, "users", user.uid));
     if (userDoc.exists()) {
       currentUser = userDoc.data();
-      launchMainApp();
+    } else {
+      currentUser = {
+        name: "Hospital Staff",
+        badge: user.email ? user.email.split("@")[0].toUpperCase() : "BM-01",
+        email: user.email || "",
+        role: "Biomed Staff"
+      };
     }
+    launchMainApp();
   } else {
     currentUser = null;
     if (mainApp) mainApp.classList.add("hidden");
@@ -296,8 +332,8 @@ if (logoutBtn) {
   logoutBtn.addEventListener("click", async () => {
     await signOut(auth);
     currentUser = null;
-    mainApp.classList.add("hidden");
-    authScreen.classList.remove("hidden");
+    if (mainApp) mainApp.classList.add("hidden");
+    if (authScreen) authScreen.classList.remove("hidden");
     clearAuthAlert();
   });
 }
@@ -332,7 +368,6 @@ function renderUserSession() {
 
 // 5. REAL-TIME CLOUD DATABASE SYNC (FIRESTORE)
 function setupCloudRealtimeSync() {
-  // Listen to live inventory updates across all phones & computers
   onSnapshot(collection(db, "inventory"), (snapshot) => {
     inventory = [];
     snapshot.forEach(docSnap => {
@@ -431,7 +466,7 @@ function renderTable() {
     tr.innerHTML = `
       <td>
         <span class="badge-biomed-tag" onclick="openAssetDetailModal('${item.id}')" title="Click to view full dossier">
-          🏷️ ${item.biomedTag || "NO TAG"}
+          🏷️️ ${item.biomedTag || "NO TAG"}
         </span>
       </td>
       <td><span class="badge ${typeClass}">${item.type}</span></td>
@@ -925,7 +960,7 @@ window.runSystemDiagnostics = function() {
 
 window.openAccountsModal = async function() {
   if (!accountsTableBody || !accountsModal) return;
-  accountsTableBody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Fetching cloud accounts...</td></tr>";
+  accountsTableBody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Fetching cloud accounts...</td></tr>";
   accountsModal.classList.remove("hidden");
 
   const querySnapshot = await getDocs(collection(db, "users"));
@@ -938,25 +973,24 @@ window.openAccountsModal = async function() {
     tr.innerHTML = `
       <td><strong>${u.name}</strong></td>
       <td><code>${u.badge}</code></td>
-      <td>${u.email}</td>
       <td><span class="badge" style="background:#edf2f7; color:#2d3748;">${u.role}</span></td>
       <td style="text-align: right;">
-        <button class="btn btn-sm btn-outline" onclick="openItUserEditModal('${u.email}')">✏️ Edit Details</button>
+        <button class="btn btn-sm btn-outline" onclick="openItUserEditModal('${u.badge}')">✏️ Edit Details</button>
       </td>
     `;
     accountsTableBody.appendChild(tr);
   });
 };
 
-window.openItUserEditModal = function(email) {
-  const user = allUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+window.openItUserEditModal = function(badge) {
+  const user = allUsers.find(u => u.badge.toUpperCase() === badge.toUpperCase());
   if (!user) return;
 
-  if (itEditUserOriginalEmail) itEditUserOriginalEmail.value = user.email;
+  if (itEditUserOriginalEmail) itEditUserOriginalEmail.value = user.email || badgeToInternalEmail(user.badge);
   if (itEditName) itEditName.value = user.name;
   if (itEditBadge) itEditBadge.value = user.badge;
   if (itEditRole) itEditRole.value = user.role;
-  if (itEditEmail) itEditEmail.value = user.email;
+  if (itEditEmail) itEditEmail.value = user.badge;
 
   if (itUserEditModal) itUserEditModal.classList.remove("hidden");
 };
