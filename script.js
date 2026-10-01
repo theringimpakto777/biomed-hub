@@ -977,12 +977,13 @@ if (itemForm) {
     const idToEdit = editItemId ? editItemId.value : "";
     const itemType = formItemType.value;
 
-    const payload = {
+  const payload = {
       biomedTag: inputBiomedTag.value.trim().toUpperCase(),
       type: itemType,
       name: inputName.value.trim(),
       identifier: inputIdentifier.value.trim(),
       location: inputLocation.value.trim(),
+      quantity: itemType === "Part" ? (parseInt(inputQuantity.value, 10) || 1) : null,
       notes: inputRemarks.value.trim() || "Awaiting supervisor verification.",
       photoData: currentPhotoBase64,
       pdfData: itemType === "Machine" ? currentPdfBase64 : null,
