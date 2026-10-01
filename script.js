@@ -55,6 +55,7 @@ let allUsers = [];
 let allInvites = [];
 let currentUser = null;
 let activeClarifyItemId = null;
+let currentTypeTab = "ALL"; // Can be 'ALL', 'Machine', or 'Part'
 
 let currentPhotoBase64 = null;
 let currentPdfBase64 = null;
@@ -93,6 +94,8 @@ const statusFilter = document.getElementById("statusFilter");
 const kpiMachines = document.getElementById("kpiMachines");
 const kpiParts = document.getElementById("kpiParts");
 const kpiPending = document.getElementById("kpiPending");
+const cardMachines = document.getElementById("kpiMachines") ? document.getElementById("kpiMachines").closest(".kpi-card") : null;
+const cardParts = document.getElementById("kpiParts") ? document.getElementById("kpiParts").closest(".kpi-card") : null;
 
 // Modals: Add / Edit Item
 const itemModal = document.getElementById("itemModal");
@@ -441,7 +444,7 @@ function renderTable() {
 
   inventoryTableBody.innerHTML = "";
 
-  const filteredList = inventory.filter(item => {
+const filteredList = inventory.filter(item => {
     const matchesQuery =
       (item.biomedTag && item.biomedTag.toLowerCase().includes(queryText)) ||
       (item.name && item.name.toLowerCase().includes(queryText)) ||
@@ -449,7 +452,11 @@ function renderTable() {
       (item.location && item.location.toLowerCase().includes(queryText));
 
     const matchesStatus = (filter === "ALL" || item.status === filter);
-    return matchesQuery && matchesStatus;
+    
+    // Check type tab filter (ALL vs Machine vs Part)
+    const matchesType = (currentTypeTab === "ALL" || item.type === currentTypeTab);
+
+    return matchesQuery && matchesStatus && matchesType;
   });
 
   if (emptyNotice) {
@@ -1187,3 +1194,37 @@ if (cancelItUserEditBtn) cancelItUserEditBtn.addEventListener("click", () => itU
 // Search & Filter Listeners
 if (searchInput) searchInput.addEventListener("input", renderTable);
 if (statusFilter) statusFilter.addEventListener("change", renderTable);
+
+// Filter list by clicking KPI cards
+function setTypeFilterTab(type) {
+  if (currentTypeTab === type) {
+    // If they click the same active tab again, toggle back to showing ALL
+    currentTypeTab = "ALL";
+  } else {
+    currentTypeTab = type;
+  }
+
+  // Update card styling
+  if (cardMachines) {
+    cardMachines.style.outline = currentTypeTab === "Machine" ? "2px solid var(--primary, #0284c7)" : "none";
+    cardMachines.style.boxShadow = currentTypeTab === "Machine" ? "0 4px 12px rgba(2, 132, 199, 0.25)" : "none";
+  }
+  if (cardParts) {
+    cardParts.style.outline = currentTypeTab === "Part" ? "2px solid #8b5cf6" : "none";
+    cardParts.style.boxShadow = currentTypeTab === "Part" ? "0 4px 12px rgba(139, 92, 246, 0.25)" : "none";
+  }
+
+  renderTable();
+}
+
+if (cardMachines) {
+  cardMachines.style.cursor = "pointer";
+  cardMachines.title = "Click to view Medical Devices only";
+  cardMachines.addEventListener("click", () => setTypeFilterTab("Machine"));
+}
+
+if (cardParts) {
+  cardParts.style.cursor = "pointer";
+  cardParts.title = "Click to view Spare Parts only";
+  cardParts.addEventListener("click", () => setTypeFilterTab("Part"));
+}
