@@ -9,62 +9,62 @@
 <body>
 
   <!-- ================= AUTHENTICATION SCREEN ================= -->
-  <div id="authScreen" class="auth-screen">
-    <div class="auth-container">
-      <div class="auth-brand">
-        <span class="auth-logo-icon">🏥</span>
-        <h2>Biomedical Asset Registry</h2>
-        <p>Clinical Engineering & Inventory Hub</p>
+  <div id="authScreen" class="auth-wrapper">
+    <div class="auth-card">
+      <div class="auth-header">
+        <span class="auth-icon">🏥</span>
+        <h2>Biomedical Engineering Hub</h2>
+        <p>Asset Tracking, Preventive Maintenance & Registry</p>
       </div>
 
-      <div class="auth-toggle-bar">
+      <div class="auth-tabs">
         <button id="tabLoginBtn" class="tab-btn active" type="button">Sign In</button>
         <button id="tabSignupBtn" class="tab-btn" type="button">Register</button>
       </div>
 
-      <div id="authAlert" class="alert-box hidden"></div>
+      <div id="authAlert" class="auth-alert hidden"></div>
 
       <!-- FORM A: LOGIN FORM -->
-      <form id="loginForm" class="auth-form-card">
-        <div class="input-field">
+      <form id="loginForm" class="auth-form">
+        <div class="form-group">
           <label for="loginBadge">Staff / Badge ID</label>
-          <input type="text" id="loginBadge" placeholder="e.g., BME-402 or IT-ADMIN-01" required autocomplete="username" />
+          <input type="text" id="loginBadge" placeholder="e.g. BME-402 or IT-ADMIN-01" required autocomplete="username" />
         </div>
 
-        <div class="input-field">
+        <div class="form-group">
           <label for="loginPassword">Password</label>
           <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password" />
         </div>
 
         <button type="submit" class="btn btn-primary btn-block">Sign In</button>
 
-        <p class="auth-footnote">
+        <p class="login-help-note">
           Forgot your password or badge ID? Please contact <strong>IT Support</strong> for account recovery.
         </p>
 
         <!-- Quick Demo Shortcuts -->
-        <div class="quick-demo-box">
-          <span class="quick-demo-label">Quick Demo Logins:</span>
-          <div class="quick-demo-buttons">
-            <button type="button" class="btn btn-chip" onclick="fillDemo('staff')">🧰 Biomed Staff</button>
-            <button type="button" class="btn btn-chip" onclick="fillDemo('supervisor')">🛡️️ Supervisor</button>
+        <div class="quick-login-section">
+          <span class="quick-title">Quick Demo Logins (Clinical Roles):</span>
+          <div class="quick-buttons">
+            <button type="button" class="btn-chip" onclick="fillDemo('staff')">🧰 Biomed Staff</button>
+            <button type="button" class="btn-chip" onclick="fillDemo('supervisor')">🛡️ Biomed Supervisor</button>
           </div>
         </div>
       </form>
 
-      <!-- FORM B: SIGN UP FORM (SECURED WITH IT AUTHORIZATION CODE) -->
-      <form id="signupForm" class="auth-form-card hidden">
-        <div class="input-field">
+      <!-- FORM B: SIGN UP FORM (SECURED WITH IT CODE) -->
+      <form id="signupForm" class="auth-form hidden">
+        <div class="form-group">
           <label for="signupName">Full Name</label>
           <input type="text" id="signupName" placeholder="e.g., Eng. Tariq Mansoor" required />
         </div>
 
-        <div class="field-row">
-          <div class="input-field">
+        <div class="form-row">
+          <div class="form-group flex-1">
             <label for="signupBadge">Staff / Badge ID</label>
             <input type="text" id="signupBadge" placeholder="e.g., BME-402" required />
           </div>
-          <div class="input-field">
+          <div class="form-group flex-1">
             <label for="signupRole">Department Role</label>
             <select id="signupRole" required>
               <option value="Biomed Staff">🧰 Biomed Staff (Tech)</option>
@@ -73,85 +73,81 @@
           </div>
         </div>
 
-        <div class="input-field">
+        <div class="form-group">
           <label for="signupAuthCode">IT Authorization / Invite Code</label>
           <input type="text" id="signupAuthCode" placeholder="e.g., BIO-9482" required autocomplete="off" />
-          <small class="field-helper">Required for clinical verification. Issued exclusively by IT Support.</small>
+          <small class="text-muted" style="font-size:0.75rem; margin-top:0.25rem; display:block;">
+            Required for clinical verification. Issued exclusively by IT Support.
+          </small>
         </div>
 
-        <div class="field-row">
-          <div class="input-field">
+        <div class="form-row">
+          <div class="form-group flex-1">
             <label for="signupPassword">Password</label>
-            <input type="password" id="signupPassword" placeholder="Min 6 characters" required />
+            <input type="password" id="signupPassword" placeholder="Minimum 6 characters" required />
           </div>
-          <div class="input-field">
+          <div class="form-group flex-1">
             <label for="signupConfirmPassword">Confirm Password</label>
             <input type="password" id="signupConfirmPassword" placeholder="Repeat password" required />
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block">Verify Code & Register</button>
+        <button type="submit" class="btn btn-primary btn-block">Register Account</button>
       </form>
     </div>
   </div>
 
-  <!-- ================= MAIN APPLICATION ================= -->
-  <div id="mainApp" class="app-container hidden">
-    <!-- TOP NAVIGATION -->
-    <header class="app-header">
-      <div class="header-left">
-        <h1 class="header-title">🏥 Biomedical Asset & Spare Parts Registry</h1>
+  <!-- ================= MAIN APP NAVIGATION ================= -->
+  <div id="mainApp" class="hidden">
+    <header class="navbar">
+      <div class="brand">
+        <span class="brand-icon">🏥</span>
+        <div>
+          <h1>Biomedical Asset Registry</h1>
+          <span class="subtitle">Clinical Engineering & Inventory System</span>
+        </div>
       </div>
-      <div class="header-right">
-        <div id="userBadge" class="user-badge-pill"></div>
+      <div class="user-panel">
+        <div id="userBadge" class="user-badge"></div>
         <button id="logoutBtn" class="btn btn-outline btn-sm">Sign Out</button>
       </div>
     </header>
 
-    <!-- IT ADMIN BANNER -->
-    <div id="itAdminBanner" class="admin-banner hidden">
-      <div class="admin-banner-inner">
-        <span>💻 <strong>IT Administrative Console:</strong> Account provisioning & system security controls</span>
-        <div class="admin-actions">
+    <div class="container">
+      <!-- IT ADMIN BANNER -->
+      <div id="itAdminBanner" class="it-banner hidden">
+        <div>
+          <h3>💻 IT Administrative Console</h3>
+          <p>Account provisioning & security invite verification</p>
+        </div>
+        <div class="it-banner-actions">
           <button class="btn btn-sm btn-it" onclick="openAccountsModal()">👥 Manage Accounts & Invites</button>
-          <button class="btn btn-sm btn-outline-white" onclick="exportDatabaseBackup()">💾 Backup Data</button>
-          <button class="btn btn-sm btn-outline-white" onclick="runSystemDiagnostics()">⚡ Diagnostics</button>
+          <button class="btn btn-sm btn-outline" onclick="exportDatabaseBackup()">💾 Backup Data</button>
+          <button class="btn btn-sm btn-outline" onclick="runSystemDiagnostics()">⚡ Diagnostics</button>
         </div>
       </div>
-    </div>
 
-    <!-- MAIN DASHBOARD CONTENT -->
-    <main class="dashboard-content">
-      <!-- STAT CARDS -->
-      <section class="stats-row">
-        <div class="stat-card">
-          <div class="stat-icon">🔬</div>
-          <div class="stat-details">
-            <span class="stat-title">Active Machines</span>
-            <div id="kpiMachines" class="stat-count">0</div>
-          </div>
+      <!-- KPIS -->
+      <section class="kpi-grid">
+        <div class="kpi-card">
+          <span class="kpi-label">Active Machines</span>
+          <span id="kpiMachines" class="kpi-val">0</span>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon">🔩</div>
-          <div class="stat-details">
-            <span class="stat-title">Spare Parts</span>
-            <div id="kpiParts" class="stat-count">0</div>
-          </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Spare Parts</span>
+          <span id="kpiParts" class="kpi-val">0</span>
         </div>
-        <div class="stat-card stat-pending">
-          <div class="stat-icon">⏳</div>
-          <div class="stat-details">
-            <span class="stat-title">Pending Approval</span>
-            <div id="kpiPending" class="stat-count">0</div>
-          </div>
+        <div class="kpi-card alert-warning">
+          <span class="kpi-label">Pending Approval</span>
+          <span id="kpiPending" class="kpi-val">0</span>
         </div>
       </section>
 
-      <!-- SEARCH & CONTROLS -->
-      <section class="toolbar-section">
-        <div class="search-wrap">
-          <input type="text" id="searchInput" class="search-input" placeholder="Search by tag, model, serial, or room..." />
-          <select id="statusFilter" class="filter-select">
+      <!-- TOOLBAR -->
+      <section class="toolbar">
+        <div class="toolbar-search">
+          <input type="text" id="searchInput" placeholder="Search by tag, model, serial, or room..." />
+          <select id="statusFilter">
             <option value="ALL">All Statuses</option>
             <option value="Approved">Approved</option>
             <option value="Pending">Pending Approval</option>
@@ -159,103 +155,102 @@
           </select>
         </div>
 
-        <div id="biomedActionButtons" class="btn-group">
+        <div id="biomedActionButtons" class="toolbar-actions">
           <button id="btnAddMachine" class="btn btn-primary">➕ Register Machine</button>
           <button id="btnAddPart" class="btn btn-secondary">🔩 Register Part</button>
         </div>
       </section>
 
-      <!-- REGISTRY TABLE -->
-      <section class="inventory-card">
-        <div class="table-wrap">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Biomed Tag</th>
-                <th>Type</th>
-                <th>Asset / Part Name</th>
-                <th>Attachments</th>
-                <th>Serial / SKU</th>
-                <th>Location / Ward</th>
-                <th>Status</th>
-                <th style="text-align: right;">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="inventoryTableBody"></tbody>
-          </table>
-        </div>
-        <div id="emptyNotice" class="empty-state-notice hidden">No matching assets or spare parts found.</div>
+      <!-- INVENTORY DATA TABLE -->
+      <section class="table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Biomed Tag</th>
+              <th>Type</th>
+              <th>Asset / Part Name</th>
+              <th>Attachments</th>
+              <th>Serial / SKU</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th class="actions-header">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="inventoryTableBody"></tbody>
+        </table>
+        <div id="emptyNotice" class="empty-notice hidden">No matching assets or spare parts found.</div>
       </section>
-    </main>
+    </div>
   </div>
 
   <!-- ================= MODALS ================= -->
 
   <!-- MODAL 1: ADD / EDIT ASSET -->
-  <div id="itemModal" class="modal-backdrop hidden">
+  <div id="itemModal" class="modal-overlay hidden">
     <div class="modal-card">
       <div class="modal-header">
         <h3 id="modalTitle">Register Equipment</h3>
-        <button id="closeItemModalBtn" class="btn-close-modal">&times;</button>
+        <button id="closeItemModalBtn" class="close-x">&times;</button>
       </div>
-      <form id="itemForm" class="modal-body-form">
+      <form id="itemForm">
         <input type="hidden" id="editItemId" />
         <input type="hidden" id="formItemType" value="Machine" />
 
-        <div class="field-row">
-          <div class="input-field">
+        <div class="form-row">
+          <div class="form-group flex-1">
             <label for="inputBiomedTag">Hospital Biomed Tag</label>
             <input type="text" id="inputBiomedTag" placeholder="e.g. BME-2026-01" required />
           </div>
-          <div class="input-field">
+          <div class="form-group flex-1">
             <label id="lblIdentifier" for="inputIdentifier">Factory Serial Number (SN)</label>
             <input type="text" id="inputIdentifier" placeholder="e.g. SN-99410" required />
           </div>
         </div>
 
-        <div class="field-row">
-          <div class="input-field">
+        <div class="form-row">
+          <div class="form-group flex-1">
             <label id="lblItemName" for="inputName">Machine / Model Name</label>
             <input type="text" id="inputName" placeholder="e.g. Draeger Fabius Plus" required />
           </div>
-          <div class="input-field">
+          <div class="form-group flex-1">
             <label for="inputLocation">Physical Location / Ward</label>
             <input type="text" id="inputLocation" placeholder="e.g. OR-4, ICU-East" required />
           </div>
         </div>
 
-        <div class="input-field">
+        <div class="form-group">
           <label for="inputRemarks">Technical Notes & Remarks</label>
           <textarea id="inputRemarks" rows="2" placeholder="Routine maintenance date, replacement history..."></textarea>
         </div>
 
         <!-- PHOTO UPLOAD & WEBCAM -->
-        <div class="input-field">
+        <div class="form-group upload-row">
           <label id="lblPhotoUpload">📷 Equipment Photo</label>
-          <div class="media-trigger-row">
-            <button type="button" id="btnTriggerCamera" class="btn btn-outline btn-sm">📸 Open Camera</button>
+          <div class="camera-action-buttons">
+            <button type="button" id="btnTriggerCamera" class="btn btn-camera btn-sm">📸 Open Camera</button>
             <button type="button" id="btnTriggerGallery" class="btn btn-outline btn-sm">📁 Choose Image</button>
             <input type="file" id="inputPhoto" accept="image/*" class="hidden" />
             <input type="file" id="inputCameraCapture" accept="image/*" capture="environment" class="hidden" />
           </div>
-          <div id="photoPreviewContainer" class="attachment-preview hidden">
+          <div id="photoPreviewContainer" class="preview-box hidden">
             <img id="photoPreviewImg" src="" alt="Asset Preview" />
-            <button type="button" id="removePhotoBtn" class="btn btn-danger btn-xs">Remove</button>
+            <button type="button" id="removePhotoBtn" class="btn-remove-file">Remove Photo</button>
           </div>
         </div>
 
         <!-- PDF REPORT UPLOAD -->
-        <div id="pdfUploadGroup" class="input-field">
+        <div id="pdfUploadGroup" class="form-group upload-row">
           <label>📑 Calibration / Service Report (PDF)</label>
-          <input type="file" id="inputPdf" accept="application/pdf" />
-          <div id="pdfPreviewContainer" class="pdf-file-preview hidden">
-            <span>📑</span>
-            <span id="pdfFileName"></span>
-            <button type="button" id="removePdfBtn" class="btn btn-danger btn-xs">Remove</button>
+          <div class="file-upload-box">
+            <input type="file" id="inputPdf" accept="application/pdf" />
+          </div>
+          <div id="pdfPreviewContainer" class="preview-box hidden">
+            <span class="pdf-tag">📑 <span id="pdfFileName"></span></span>
+            <button type="button" id="removePdfBtn" class="btn-remove-file">Remove PDF</button>
           </div>
         </div>
 
-        <div class="modal-footer-btns">
+        <div class="modal-footer">
           <button type="button" id="cancelItemModalBtn" class="btn btn-outline">Cancel</button>
           <button type="submit" class="btn btn-primary">Save to Registry</button>
         </div>
@@ -264,72 +259,90 @@
   </div>
 
   <!-- MODAL 2: ASSET DETAILS (DOSSIER) -->
-  <div id="assetDetailModal" class="modal-backdrop hidden">
-    <div class="modal-card">
+  <div id="assetDetailModal" class="modal-overlay hidden">
+    <div class="modal-card detail-dossier-card">
       <div class="modal-header">
-        <div class="detail-header-wrap">
+        <div class="dossier-header-title">
           <span id="detailTypeBadge" class="badge"></span>
           <h3 id="detailAssetName">Asset Details</h3>
         </div>
-        <button id="closeDetailModalBtn" class="btn-close-modal">&times;</button>
+        <button id="closeDetailModalBtn" class="close-x">&times;</button>
       </div>
-      <div class="modal-body-content">
-        <div class="detail-matrix">
-          <div><span class="label">Biomed Tag:</span> <strong id="detailBiomedTag"></strong></div>
-          <div><span class="label">Identifier / SN:</span> <code id="detailIdentifier"></code></div>
-          <div><span class="label">Location:</span> <span id="detailLocation"></span></div>
-          <div><span class="label">Status:</span> <span id="detailStatusContainer"></span></div>
-          <div><span class="label">Submitted By:</span> <span id="detailSubmittedBy"></span></div>
+      <div class="modal-body">
+        <div class="dossier-grid">
+          <div class="dossier-item">
+            <span class="dossier-label">Biomed Tag</span>
+            <strong id="detailBiomedTag" class="dossier-val font-mono"></strong>
+          </div>
+          <div class="dossier-item">
+            <span class="dossier-label">Identifier / SN</span>
+            <code id="detailIdentifier" class="dossier-val font-mono"></code>
+          </div>
+          <div class="dossier-item">
+            <span class="dossier-label">Location / Ward</span>
+            <span id="detailLocation" class="dossier-val"></span>
+          </div>
+          <div class="dossier-item">
+            <span class="dossier-label">Status</span>
+            <div id="detailStatusContainer" style="margin-top:0.2rem;"></div>
+          </div>
+          <div class="dossier-item">
+            <span class="dossier-label">Submitted By</span>
+            <span id="detailSubmittedBy" class="dossier-val"></span>
+          </div>
         </div>
 
-        <div class="detail-box">
-          <span class="label">Technical Notes:</span>
-          <p id="detailNotes"></p>
+        <div class="form-group">
+          <span class="dossier-label">Technical Notes & Remarks</span>
+          <div id="detailNotes" class="dossier-notes-box"></div>
         </div>
 
-        <div class="detail-box">
-          <span class="label">Attached Photo:</span>
-          <div id="detailPhotoContainer"></div>
-        </div>
-
-        <div id="detailPdfCard" class="detail-box">
-          <span class="label">Attached Calibration Report:</span>
-          <div id="detailPdfContainer"></div>
+        <div class="dossier-media-section">
+          <h4>Equipment Attachments</h4>
+          <div class="dossier-media-grid">
+            <div class="media-card">
+              <span class="media-title">Equipment Photo</span>
+              <div id="detailPhotoContainer" class="media-content"></div>
+            </div>
+            <div id="detailPdfCard" class="media-card">
+              <span class="media-title">Calibration / Service Report</span>
+              <div id="detailPdfContainer" class="media-content"></div>
+            </div>
+          </div>
         </div>
       </div>
-      <div id="detailModalFooter" class="modal-footer-btns">
+      <div id="detailModalFooter" class="modal-footer">
         <button type="button" id="closeDetailModalBottomBtn" class="btn btn-outline">Close</button>
       </div>
     </div>
   </div>
 
   <!-- MODAL 3: IT ACCOUNTS & INVITE CODE GENERATOR -->
-  <div id="accountsModal" class="modal-backdrop hidden">
-    <div class="modal-card modal-wide">
+  <div id="accountsModal" class="modal-overlay hidden">
+    <div class="modal-card modal-lg">
       <div class="modal-header">
         <h3>👥 IT Account Management & Security Codes</h3>
-        <button id="closeAccountsModalBtn" class="btn-close-modal">&times;</button>
+        <button id="closeAccountsModalBtn" class="close-x">&times;</button>
       </div>
 
-      <div class="modal-body-content">
-        <!-- INVITE GENERATOR BOX -->
-        <div class="generator-box">
-          <h4>🎟️ Generate Staff Registration Invite</h4>
-          <p class="muted-text">Create a verified one-time passcode for authorized technicians before they register.</p>
-          <div class="generator-controls">
-            <input type="text" id="genBadge" placeholder="Staff Badge ID (e.g. BM-02)" />
-            <select id="genRole">
+      <div class="modal-body">
+        <!-- GENERATOR BOX -->
+        <div style="background:#faf5ff; border:1px solid #d6bcfa; border-radius:8px; padding:1rem; margin-bottom:1.25rem;">
+          <h4 style="margin:0 0 0.25rem 0; color:var(--it-accent);">🎟️ Generate Staff Registration Invite</h4>
+          <p style="color:var(--text-muted); font-size:0.8rem; margin:0 0 0.75rem 0;">Create a one-time passcode for a technician before they register.</p>
+          <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+            <input type="text" id="genBadge" placeholder="Staff Badge ID (e.g. BM-02)" style="flex:1; padding:0.45rem 0.65rem; border:1px solid var(--border-color); border-radius:6px;" />
+            <select id="genRole" style="padding:0.45rem 0.65rem; border:1px solid var(--border-color); border-radius:6px;">
               <option value="Biomed Staff">Biomed Staff</option>
               <option value="Biomed Supervisor">Biomed Supervisor</option>
             </select>
             <button type="button" class="btn btn-it" onclick="handleGenerateInvite()">Create Passcode</button>
           </div>
-          <div id="latestInviteResult" class="generator-result hidden"></div>
+          <div id="latestInviteResult" class="hidden" style="margin-top:0.6rem; padding:0.6rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; font-size:0.85rem;"></div>
         </div>
 
-        <!-- ACTIVE INVITES TABLE -->
-        <h4 style="margin-top: 1rem;">Active & Historical Invite Codes</h4>
-        <div class="table-wrap">
+        <h4 style="margin:1rem 0 0.5rem 0;">Invite Codes</h4>
+        <div class="table-card" style="max-height:160px; overflow-y:auto; margin-bottom:1.5rem;">
           <table class="data-table">
             <thead>
               <tr>
@@ -344,16 +357,15 @@
           </table>
         </div>
 
-        <!-- REGISTERED USERS DIRECTORY -->
-        <h4 style="margin-top: 1.5rem;">Registered Staff Directory</h4>
-        <div class="table-wrap">
+        <h4 style="margin:0 0 0.5rem 0;">Registered Staff Directory</h4>
+        <div class="table-card" style="max-height:200px; overflow-y:auto;">
           <table class="data-table">
             <thead>
               <tr>
                 <th>Full Name</th>
                 <th>Badge ID</th>
-                <th>Department Role</th>
-                <th style="text-align: right;">Action</th>
+                <th>Role</th>
+                <th class="actions-header">Action</th>
               </tr>
             </thead>
             <tbody id="accountsTableBody"></tbody>
@@ -361,31 +373,31 @@
         </div>
       </div>
 
-      <div class="modal-footer-btns">
+      <div class="modal-footer">
         <button type="button" id="closeAccountsBtn" class="btn btn-outline">Close</button>
       </div>
     </div>
   </div>
 
   <!-- MODAL 4: IT USER EDIT -->
-  <div id="itUserEditModal" class="modal-backdrop hidden">
+  <div id="itUserEditModal" class="modal-overlay hidden">
     <div class="modal-card">
       <div class="modal-header">
         <h3>✏️ Edit Staff Account</h3>
-        <button id="closeItUserEditModalBtn" class="btn-close-modal">&times;</button>
+        <button id="closeItUserEditModalBtn" class="close-x">&times;</button>
       </div>
-      <form id="itUserEditForm" class="modal-body-form">
+      <form id="itUserEditForm">
         <input type="hidden" id="itEditUserOriginalEmail" />
-        <div class="input-field">
+        <div class="form-group">
           <label>Full Name</label>
           <input type="text" id="itEditName" required />
         </div>
-        <div class="field-row">
-          <div class="input-field">
+        <div class="form-row">
+          <div class="form-group flex-1">
             <label>Badge ID</label>
             <input type="text" id="itEditBadge" required />
           </div>
-          <div class="input-field">
+          <div class="form-group flex-1">
             <label>Department Role</label>
             <select id="itEditRole" required>
               <option value="Biomed Staff">Biomed Staff</option>
@@ -394,7 +406,7 @@
             </select>
           </div>
         </div>
-        <div class="modal-footer-btns">
+        <div class="modal-footer">
           <button type="button" id="cancelItUserEditBtn" class="btn btn-outline">Cancel</button>
           <button type="submit" class="btn btn-primary">Save Changes</button>
         </div>
@@ -403,17 +415,17 @@
   </div>
 
   <!-- MODAL 5: DESKTOP WEBCAM -->
-  <div id="liveCameraModal" class="modal-backdrop hidden">
-    <div class="modal-card">
+  <div id="liveCameraModal" class="modal-overlay hidden">
+    <div class="modal-card live-camera-card">
       <div class="modal-header">
         <h3>Live Camera</h3>
-        <button id="closeLiveCameraBtn" class="btn-close-modal">&times;</button>
+        <button id="closeLiveCameraBtn" class="close-x">&times;</button>
       </div>
-      <div class="modal-body-content text-center">
-        <video id="cameraVideo" autoplay playsinline style="width:100%; border-radius:6px; background:#000;"></video>
+      <div class="live-camera-body">
+        <video id="cameraVideo" autoplay playsinline></video>
         <canvas id="cameraCanvas" class="hidden"></canvas>
       </div>
-      <div class="modal-footer-btns">
+      <div class="modal-footer">
         <button type="button" id="btnCancelCamera" class="btn btn-outline">Cancel</button>
         <button type="button" id="btnCaptureShutter" class="btn btn-primary">📸 Snap Photo</button>
       </div>
@@ -421,29 +433,29 @@
   </div>
 
   <!-- MODAL 6: LIGHTBOX IMAGE VIEWER -->
-  <div id="imageViewerModal" class="modal-backdrop hidden">
-    <div class="modal-card">
+  <div id="imageViewerModal" class="modal-overlay hidden">
+    <div class="modal-card photo-lightbox-card">
       <div class="modal-header">
         <h3 id="imageViewerTitle">Photo Preview</h3>
-        <button id="closeImageViewerBtn" class="btn-close-modal">&times;</button>
+        <button id="closeImageViewerBtn" class="close-x">&times;</button>
       </div>
-      <div class="modal-body-content text-center">
-        <img id="imageViewerImg" src="" alt="Enlarged preview" style="max-width:100%; border-radius:4px;" />
+      <div class="image-viewer-body">
+        <img id="imageViewerImg" src="" alt="Enlarged preview" />
       </div>
     </div>
   </div>
 
   <!-- MODAL 7: CLARIFICATION MODAL -->
-  <div id="clarifyModal" class="modal-backdrop hidden">
+  <div id="clarifyModal" class="modal-overlay hidden">
     <div class="modal-card">
       <div class="modal-header">
         <h3>Request Supervisor Clarification</h3>
-        <button id="closeClarifyModalBtn" class="btn-close-modal">&times;</button>
+        <button id="closeClarifyModalBtn" class="close-x">&times;</button>
       </div>
-      <div class="modal-body-content">
-        <textarea id="clarifyNoteInput" rows="4" style="width:100%;" placeholder="Specify calibration details or missing photos needed from technician..."></textarea>
+      <div class="modal-body">
+        <textarea id="clarifyNoteInput" rows="4" placeholder="Specify calibration details or missing photos needed from technician..."></textarea>
       </div>
-      <div class="modal-footer-btns">
+      <div class="modal-footer">
         <button type="button" id="cancelClarifyBtn" class="btn btn-outline">Cancel</button>
         <button type="button" id="submitClarifyBtn" class="btn btn-warning">Submit Request</button>
       </div>
