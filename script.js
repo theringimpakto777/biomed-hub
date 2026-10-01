@@ -179,7 +179,7 @@ const itEditRole = document.getElementById("itEditRole");
 function showAuthAlert(message, type = "error") {
   if (!authAlert) return;
   authAlert.textContent = message;
-  authAlert.className = `auth-alert ${type}`;
+  authAlert.className = `alert-box ${type}`;
   authAlert.classList.remove("hidden");
 }
 
@@ -225,11 +225,13 @@ if (loginForm) {
       if (userDoc.exists()) {
         currentUser = userDoc.data();
       } else {
+        // Fallback recognizes both IT-ADMIN and ADMIN as IT Support
+        const isIT = rawBadge.includes("IT") || rawBadge.includes("ADMIN");
         currentUser = {
-          name: rawBadge.startsWith("IT") ? "System Administrator" : "Biomedical Specialist",
+          name: isIT ? "System Administrator" : "Biomedical Specialist",
           badge: rawBadge,
           email: silentEmail,
-          role: rawBadge.startsWith("IT") ? "IT Support" : "Biomed Staff"
+          role: isIT ? "IT Support" : "Biomed Staff"
         };
       }
 
@@ -353,11 +355,13 @@ onAuthStateChanged(auth, async (user) => {
     if (userDoc.exists()) {
       currentUser = userDoc.data();
     } else {
+      const emailPrefix = user.email ? user.email.split("@")[0].toUpperCase() : "BM-01";
+      const isIT = emailPrefix.includes("IT") || emailPrefix.includes("ADMIN");
       currentUser = {
-        name: "Hospital Staff",
-        badge: user.email ? user.email.split("@")[0].toUpperCase() : "BM-01",
+        name: isIT ? "System Administrator" : "Hospital Staff",
+        badge: emailPrefix,
         email: user.email || "",
-        role: user.email && user.email.includes("it-admin") ? "IT Support" : "Biomed Staff"
+        role: isIT ? "IT Support" : "Biomed Staff"
       };
     }
     launchMainApp();
@@ -491,7 +495,7 @@ function renderTable() {
       actionHtml = `
         <div style="text-align: right; display: flex; justify-content: flex-end; align-items: center; gap: 0.35rem;">
           <button class="btn btn-sm btn-outline" onclick="openAssetDetailModal('${item.id}')">👁️ View</button>
-          <span class="badge badge-locked" style="background:#faf5ff; color:var(--it-accent);">💻 IT Read-Only</span>
+          <span class="badge badge-locked" style="background:#faf5ff; color:var(--it-accent, #6b46c1);">💻 IT Read-Only</span>
         </div>
       `;
     } else {
@@ -628,7 +632,7 @@ window.openAssetDetailModal = function(id) {
 
   if (currentUser && currentUser.role === "Biomed Supervisor") {
     footerHtml = `
-      <button type="button" class="btn btn-outline" onclick="openEditModal('${item.id}')">✏️ Edit Details</button>
+      <button type="button" class="btn btn-outline" onclick="openEditModal('${item.id}')">✏️️ Edit Details</button>
       <button type="button" class="btn btn-warning" onclick="openClarifyModal('${item.id}')">💬 Clarify</button>
       <button type="button" class="btn btn-approve" onclick="handleApprove('${item.id}')">✅ Approve Equipment</button>
       <button type="button" class="btn btn-outline" onclick="closeDetailModal()">Close</button>
@@ -1022,7 +1026,7 @@ window.handleGenerateInvite = async function() {
 
     if (latestInviteResult) {
       latestInviteResult.innerHTML = `
-        ✅ <strong>Code Generated:</strong> <code style="font-size:1.1rem; color:var(--it-accent);">${inviteCode}</code>
+        ✅ <strong>Code Generated:</strong> <code style="font-size:1.1rem; color:var(--it-accent, #6b46c1);">${inviteCode}</code>
         <p style="margin:0.25rem 0 0; font-size:0.8rem;">Give this code to technician with Badge <strong>${badgeTarget}</strong>.</p>
       `;
       latestInviteResult.classList.remove("hidden");
