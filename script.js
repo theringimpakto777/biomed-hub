@@ -905,18 +905,30 @@ if (btnAddMachine) {
     resetModalAttachments();
     if (editItemId) editItemId.value = "";
     if (formItemType) formItemType.value = "Machine";
-    if (modalTitle) modalTitle.textContent = "➕ Register New Biomedical Machine";
+    
+    if (modalTitle) modalTitle.textContent = "➕ Register New Medical Device";
+    
+    const lblBiomedTag = document.querySelector("label[for='inputBiomedTag']");
+    if (lblBiomedTag) lblBiomedTag.textContent = "Hospital Asset / Biomed Tag";
     if (inputBiomedTag) inputBiomedTag.placeholder = "e.g., BME-2026-0155";
-    if (lblItemName) lblItemName.textContent = "Machine / Model Name";
+    
+    if (lblItemName) lblItemName.textContent = "Equipment / Model Name";
+    if (inputName) inputName.placeholder = "e.g., Draeger Fabius Plus";
+    
     if (lblIdentifier) lblIdentifier.textContent = "Factory Serial Number (SN)";
     if (inputIdentifier) inputIdentifier.placeholder = "e.g., SN-88341";
-    if (lblPhotoUpload) lblPhotoUpload.textContent = "📷 Machine Photo";
+    
+    const lblLocation = document.querySelector("label[for='inputLocation']");
+    if (lblLocation) lblLocation.textContent = "Clinical Department / Ward";
+    if (inputLocation) inputLocation.placeholder = "e.g., OR-04 / ICU-East";
+
+    if (lblPhotoUpload) lblPhotoUpload.textContent = "📷 Equipment Photo";
     if (pdfUploadGroup) pdfUploadGroup.classList.remove("hidden");
+
     if (itemForm) itemForm.reset();
     if (itemModal) itemModal.classList.remove("hidden");
   });
 }
-
 // Register Part Specific Setup
 const btnAddPart = document.getElementById("btnAddPart");
 if (btnAddPart) {
