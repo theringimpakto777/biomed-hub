@@ -523,6 +523,9 @@ function renderTable() {
         <strong class="clickable-asset-title" onclick="openAssetDetailModal('${item.id}')" title="Click to view details">
           ${item.name}
         </strong>
+        ${item.type === "Part" && item.quantity !== null && item.quantity !== undefined 
+          ? `<span class="badge" style="background:#e0e7ff; color:#3730a3; margin-top:2px;">Stock: ${item.quantity}</span>` 
+          : ""}
         <span class="item-notes">${item.notes || "No technical notes."}</span>
       </td>
       <td>${attachmentsHtml}</td>
