@@ -876,14 +876,21 @@ window.openEditModal = function(id) {
   if (inputRemarks) inputRemarks.value = item.notes || "";
 
   if (item.type === "Machine") {
-    if (lblItemName) lblItemName.textContent = "Machine / Model Name";
+    if (lblBiomedTag) lblBiomedTag.textContent = "Hospital Asset / Biomed Tag";
     if (lblIdentifier) lblIdentifier.textContent = "Factory Serial Number (SN)";
+    if (lblItemName) lblItemName.textContent = "Equipment / Model Name";
+    if (lblLocation) lblLocation.textContent = "Clinical Department / Ward";
     if (lblPhotoUpload) lblPhotoUpload.textContent = "📷 Machine Photo";
+    if (partQuantityGroup) partQuantityGroup.classList.add("hidden");
     if (pdfUploadGroup) pdfUploadGroup.classList.remove("hidden");
   } else {
-    if (lblItemName) lblItemName.textContent = "Part Description";
-    if (lblIdentifier) lblIdentifier.textContent = "Part SKU / Code";
+    if (lblBiomedTag) lblBiomedTag.textContent = "Part SKU / Catalog P/N";
+    if (lblIdentifier) lblIdentifier.textContent = "Compatible Machine / Model";
+    if (lblItemName) lblItemName.textContent = "Part Description & Specs";
+    if (lblLocation) lblLocation.textContent = "Workshop Bin / Shelf Location";
     if (lblPhotoUpload) lblPhotoUpload.textContent = "📷 Spare Part Photo";
+    if (partQuantityGroup) partQuantityGroup.classList.remove("hidden");
+    if (inputQuantity) inputQuantity.value = item.quantity || 1;
     if (pdfUploadGroup) pdfUploadGroup.classList.add("hidden");
   }
 
