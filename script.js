@@ -909,23 +909,22 @@ if (btnAddMachine) {
     resetModalAttachments();
     if (editItemId) editItemId.value = "";
     if (formItemType) formItemType.value = "Machine";
-    
     if (modalTitle) modalTitle.textContent = "➕ Register New Medical Device";
     
-    const lblBiomedTag = document.querySelector("label[for='inputBiomedTag']");
+    // Clinical Machine Labels
     if (lblBiomedTag) lblBiomedTag.textContent = "Hospital Asset / Biomed Tag";
     if (inputBiomedTag) inputBiomedTag.placeholder = "e.g., BME-2026-0155";
-    
-    if (lblItemName) lblItemName.textContent = "Equipment / Model Name";
-    if (inputName) inputName.placeholder = "e.g., Draeger Fabius Plus";
-    
+
     if (lblIdentifier) lblIdentifier.textContent = "Factory Serial Number (SN)";
     if (inputIdentifier) inputIdentifier.placeholder = "e.g., SN-88341";
-    
-    const lblLocation = document.querySelector("label[for='inputLocation']");
+
+    if (lblItemName) lblItemName.textContent = "Equipment / Model Name";
+    if (inputName) inputName.placeholder = "e.g., Draeger Fabius Plus";
+
     if (lblLocation) lblLocation.textContent = "Clinical Department / Ward";
     if (inputLocation) inputLocation.placeholder = "e.g., OR-04 / ICU-East";
 
+    if (partQuantityGroup) partQuantityGroup.classList.add("hidden");
     if (lblPhotoUpload) lblPhotoUpload.textContent = "📷 Equipment Photo";
     if (pdfUploadGroup) pdfUploadGroup.classList.remove("hidden");
 
