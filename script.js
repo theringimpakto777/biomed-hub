@@ -917,19 +917,39 @@ if (btnAddMachine) {
   });
 }
 
+// Register Part Specific Setup
 const btnAddPart = document.getElementById("btnAddPart");
 if (btnAddPart) {
   btnAddPart.addEventListener("click", () => {
     resetModalAttachments();
     if (editItemId) editItemId.value = "";
     if (formItemType) formItemType.value = "Part";
-    if (modalTitle) modalTitle.textContent = "🔩 Register New Spare Part";
-    if (inputBiomedTag) inputBiomedTag.placeholder = "e.g., PRT-BAT-009";
-    if (lblItemName) lblItemName.textContent = "Part Description";
-    if (lblIdentifier) lblIdentifier.textContent = "Part SKU / Code";
-    if (inputIdentifier) inputIdentifier.placeholder = "e.g., SKU-FLT-02";
-    if (lblPhotoUpload) lblPhotoUpload.textContent = "📷 Spare Part Photo";
-    if (pdfUploadGroup) pdfUploadGroup.classList.add("hidden");
+    
+    // Custom Titles & Placeholders for Spare Parts
+    if (modalTitle) modalTitle.textContent = "🔩 Register Spare Part / Consumable";
+    
+    // Field 1: Part Number instead of Biomed Tag
+    const lblBiomedTag = document.querySelector("label[for='inputBiomedTag']");
+    if (lblBiomedTag) lblBiomedTag.textContent = "Spare Part SKU / P/N";
+    if (inputBiomedTag) inputBiomedTag.placeholder = "e.g., PN-O2-SENSOR-01";
+    
+    // Field 2: Description instead of Machine Name
+    if (lblItemName) lblItemName.textContent = "Part Description & Specs";
+    if (inputName) inputName.placeholder = "e.g., O2 Sensor Fuel Cell (M-03)";
+    
+    // Field 3: Compatible Machine / OEM Ref
+    if (lblIdentifier) lblIdentifier.textContent = "Compatible Machine / Model";
+    if (inputIdentifier) inputIdentifier.placeholder = "e.g., Draeger Fabius / Evita XL";
+    
+    // Field 4: Storage Bin instead of Ward/Room
+    const lblLocation = document.querySelector("label[for='inputLocation']");
+    if (lblLocation) lblLocation.textContent = "Workshop Bin / Shelf Location";
+    if (inputLocation) inputLocation.placeholder = "e.g., Rack B, Bin 04";
+
+    // Media & Attachments
+    if (lblPhotoUpload) lblPhotoUpload.textContent = "📷 Part / Packaging Photo";
+    if (pdfUploadGroup) pdfUploadGroup.classList.add("hidden"); // Parts rarely need calibration reports
+
     if (itemForm) itemForm.reset();
     if (itemModal) itemModal.classList.remove("hidden");
   });
