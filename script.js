@@ -107,6 +107,10 @@ const inputName = document.getElementById("inputName");
 const inputIdentifier = document.getElementById("inputIdentifier");
 const inputLocation = document.getElementById("inputLocation");
 const inputRemarks = document.getElementById("inputRemarks");
+const lblBiomedTag = document.getElementById("lblBiomedTag");
+const lblLocation = document.getElementById("lblLocation");
+const partQuantityGroup = document.getElementById("partQuantityGroup");
+const inputQuantity = document.getElementById("inputQuantity");
 
 // Camera & Upload Triggers
 const lblPhotoUpload = document.getElementById("lblPhotoUpload");
