@@ -22,7 +22,9 @@ import {
   onSnapshot, 
   deleteDoc, 
   updateDoc,
-  serverTimestamp
+  query,
+  where,
+  serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // 1. FIREBASE CONFIGURATION (biomed-hub-b028c)
@@ -50,6 +52,7 @@ function badgeToInternalEmail(badge) {
 // 2. GLOBAL STATE
 let inventory = [];
 let allUsers = [];
+let allInvites = [];
 let currentUser = null;
 let activeClarifyItemId = null;
 
@@ -74,6 +77,7 @@ const loginPassword = document.getElementById("loginPassword");
 const signupName = document.getElementById("signupName");
 const signupBadge = document.getElementById("signupBadge");
 const signupRole = document.getElementById("signupRole");
+const signupAuthCode = document.getElementById("signupAuthCode");
 const signupPassword = document.getElementById("signupPassword");
 const signupConfirmPassword = document.getElementById("signupConfirmPassword");
 
@@ -156,17 +160,20 @@ const closeImageViewerBtn = document.getElementById("closeImageViewerBtn");
 const clarifyModal = document.getElementById("clarifyModal");
 const clarifyNoteInput = document.getElementById("clarifyNoteInput");
 
-// IT Modals
+// IT Modals & Elements
 const accountsModal = document.getElementById("accountsModal");
 const accountsTableBody = document.getElementById("accountsTableBody");
+const invitesTableBody = document.getElementById("invitesTableBody");
+const genBadge = document.getElementById("genBadge");
+const genRole = document.getElementById("genRole");
+const latestInviteResult = document.getElementById("latestInviteResult");
+
 const itUserEditModal = document.getElementById("itUserEditModal");
 const itUserEditForm = document.getElementById("itUserEditForm");
 const itEditUserOriginalEmail = document.getElementById("itEditUserOriginalEmail");
 const itEditName = document.getElementById("itEditName");
 const itEditBadge = document.getElementById("itEditBadge");
 const itEditRole = document.getElementById("itEditRole");
-const itEditEmail = document.getElementById("itEditEmail");
-const itEditPassword = document.getElementById("itEditPassword");
 
 // 4. AUTHENTICATION & SESSION HANDLING
 function showAuthAlert(message, type = "error") {
@@ -242,7 +249,7 @@ if (loginForm) {
   });
 }
 
-// Sign Up via Badge ID (No work email field needed)
+// Sign Up via Badge ID with IT Authorization Code Verification
 if (signupForm) {
   signupForm.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -251,8 +258,14 @@ if (signupForm) {
     const name = signupName.value.trim();
     const badge = signupBadge.value.trim().toUpperCase();
     const role = signupRole.value;
+    const authCode = signupAuthCode ? signupAuthCode.value.trim().toUpperCase() : "";
     const password = signupPassword.value.trim();
     const confirmPassword = signupConfirmPassword.value.trim();
+
+    if (!authCode) {
+      showAuthAlert("IT Authorization Code is required to register.", "error");
+      return;
+    }
 
     if (password.length < 6) {
       showAuthAlert("Password must be at least 6 characters.", "error");
@@ -263,12 +276,32 @@ if (signupForm) {
       return;
     }
 
-    const silentEmail = badgeToInternalEmail(badge);
-
     try {
+      // 1. Verify Authorization Code against Firestore
+      const invitesRef = collection(db, "invitations");
+      const q = query(invitesRef, where("code", "==", authCode), where("used", "==", false));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        showAuthAlert("Invalid or expired IT Authorization Code. Contact IT Support.", "error");
+        return;
+      }
+
+      const inviteDoc = querySnapshot.docs[0];
+      const inviteData = inviteDoc.data();
+
+      // Check if code was locked to a specific badge
+      if (inviteData.assignedBadge && inviteData.assignedBadge.toUpperCase() !== badge) {
+        showAuthAlert(`This code was issued specifically for Badge ID ${inviteData.assignedBadge}.`, "error");
+        return;
+      }
+
+      // 2. Create the account in Firebase Auth
+      const silentEmail = badgeToInternalEmail(badge);
       const userCredential = await createUserWithEmailAndPassword(auth, silentEmail, password);
       const uid = userCredential.user.uid;
 
+      // 3. Save profile in Firestore
       const userData = { 
         uid, 
         name, 
@@ -279,8 +312,16 @@ if (signupForm) {
       };
       await setDoc(doc(db, "users", uid), userData);
 
+      // 4. Burn the authorization code
+      await updateDoc(doc(db, "invitations", inviteDoc.id), {
+        used: true,
+        usedByBadge: badge,
+        usedByName: name,
+        usedAt: serverTimestamp()
+      });
+
       signupForm.reset();
-      showAuthAlert(`Badge ${badge} registered successfully! You can now sign in.`, "success");
+      showAuthAlert(`Badge ${badge} authorized & registered! You can now sign in.`, "success");
       tabLoginBtn.click();
       if (loginBadge) loginBadge.value = badge;
     } catch (err) {
@@ -293,7 +334,7 @@ if (signupForm) {
   });
 }
 
-// Clinical Quick Demo Shortcuts (Using Badge IDs)
+// Quick Demo shortcuts
 window.fillDemo = function(roleKey) {
   if (tabLoginBtn) tabLoginBtn.click();
   if (roleKey === "staff") {
@@ -316,7 +357,7 @@ onAuthStateChanged(auth, async (user) => {
         name: "Hospital Staff",
         badge: user.email ? user.email.split("@")[0].toUpperCase() : "BM-01",
         email: user.email || "",
-        role: "Biomed Staff"
+        role: user.email && user.email.includes("it-admin") ? "IT Support" : "Biomed Staff"
       };
     }
     launchMainApp();
@@ -387,17 +428,17 @@ function updateKPIs() {
 
 function renderTable() {
   if (!inventoryTableBody) return;
-  const query = (searchInput ? searchInput.value : "").toLowerCase().trim();
+  const queryText = (searchInput ? searchInput.value : "").toLowerCase().trim();
   const filter = statusFilter ? statusFilter.value : "ALL";
 
   inventoryTableBody.innerHTML = "";
 
   const filteredList = inventory.filter(item => {
     const matchesQuery =
-      (item.biomedTag && item.biomedTag.toLowerCase().includes(query)) ||
-      (item.name && item.name.toLowerCase().includes(query)) ||
-      (item.identifier && item.identifier.toLowerCase().includes(query)) ||
-      (item.location && item.location.toLowerCase().includes(query));
+      (item.biomedTag && item.biomedTag.toLowerCase().includes(queryText)) ||
+      (item.name && item.name.toLowerCase().includes(queryText)) ||
+      (item.identifier && item.identifier.toLowerCase().includes(queryText)) ||
+      (item.location && item.location.toLowerCase().includes(queryText));
 
     const matchesStatus = (filter === "ALL" || item.status === filter);
     return matchesQuery && matchesStatus;
@@ -466,7 +507,7 @@ function renderTable() {
     tr.innerHTML = `
       <td>
         <span class="badge-biomed-tag" onclick="openAssetDetailModal('${item.id}')" title="Click to view full dossier">
-          🏷️️ ${item.biomedTag || "NO TAG"}
+          🏷️ ${item.biomedTag || "NO TAG"}
         </span>
       </td>
       <td><span class="badge ${typeClass}">${item.type}</span></td>
@@ -492,7 +533,7 @@ function renderTable() {
   updateKPIs();
 }
 
-// 7. SUPERVISOR ACTIONS (SAVED DIRECTLY TO CLOUD)
+// 7. SUPERVISOR ACTIONS
 window.handleApprove = async function(id) {
   const item = inventory.find(i => String(i.id) === String(id));
   if (!item) return;
@@ -583,9 +624,7 @@ window.openAssetDetailModal = function(id) {
     detailPdfCard.classList.add("hidden");
   }
 
-  let footerHtml = `
-    <button type="button" class="btn btn-outline" onclick="closeDetailModal()">Close</button>
-  `;
+  let footerHtml = `<button type="button" class="btn btn-outline" onclick="closeDetailModal()">Close</button>`;
 
   if (currentUser && currentUser.role === "Biomed Supervisor") {
     footerHtml = `
@@ -938,7 +977,7 @@ const cancelClarifyBtn = document.getElementById("cancelClarifyBtn");
 if (closeClarifyModalBtn) closeClarifyModalBtn.addEventListener("click", () => clarifyModal.classList.add("hidden"));
 if (cancelClarifyBtn) cancelClarifyBtn.addEventListener("click", () => clarifyModal.classList.add("hidden"));
 
-// 11. IT SYSTEM SUPPORT & ACCOUNT MANAGEMENT
+// 11. IT SYSTEM SUPPORT & INVITE CODE GENERATION
 window.exportDatabaseBackup = function() {
   const data = {
     backupDate: new Date().toISOString(),
@@ -958,11 +997,74 @@ window.runSystemDiagnostics = function() {
   alert(`⚡ Cloud Firestore Status: Connected\n• Active Inventory Records: ${inventory.length}`);
 };
 
-window.openAccountsModal = async function() {
-  if (!accountsTableBody || !accountsModal) return;
-  accountsTableBody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Fetching cloud accounts...</td></tr>";
-  accountsModal.classList.remove("hidden");
+// Generate a random 4-digit code (e.g. BIO-7821)
+window.handleGenerateInvite = async function() {
+  const badgeTarget = genBadge ? genBadge.value.trim().toUpperCase() : "";
+  const roleTarget = genRole ? genRole.value : "Biomed Staff";
 
+  if (!badgeTarget) {
+    alert("Please enter a target Staff Badge ID (e.g. BM-02).");
+    return;
+  }
+
+  const randomNum = Math.floor(1000 + Math.random() * 9000);
+  const inviteCode = `BIO-${randomNum}`;
+
+  try {
+    await setDoc(doc(db, "invitations", inviteCode), {
+      code: inviteCode,
+      assignedBadge: badgeTarget,
+      assignedRole: roleTarget,
+      used: false,
+      createdBy: currentUser ? currentUser.badge : "IT-ADMIN",
+      createdAt: serverTimestamp()
+    });
+
+    if (latestInviteResult) {
+      latestInviteResult.innerHTML = `
+        ✅ <strong>Code Generated:</strong> <code style="font-size:1.1rem; color:var(--it-accent);">${inviteCode}</code>
+        <p style="margin:0.25rem 0 0; font-size:0.8rem;">Give this code to technician with Badge <strong>${badgeTarget}</strong>.</p>
+      `;
+      latestInviteResult.classList.remove("hidden");
+    }
+
+    if (genBadge) genBadge.value = "";
+    loadAccountsAndInvites();
+  } catch (err) {
+    alert("Failed to generate invite code: " + err.message);
+  }
+};
+
+async function loadAccountsAndInvites() {
+  if (!accountsTableBody || !invitesTableBody) return;
+
+  // 1. Fetch Invites
+  const invitesSnapshot = await getDocs(collection(db, "invitations"));
+  allInvites = [];
+  invitesSnapshot.forEach(docSnap => allInvites.push(docSnap.data()));
+
+  invitesTableBody.innerHTML = "";
+  if (allInvites.length === 0) {
+    invitesTableBody.innerHTML = "<tr><td colspan='5' style='text-align:center; color:var(--text-muted);'>No invite codes created yet.</td></tr>";
+  } else {
+    allInvites.forEach(inv => {
+      const tr = document.createElement("tr");
+      const statusBadge = inv.used 
+        ? `<span class="badge" style="background:#fee2e2; color:#991b1b;">Burned / Used</span>`
+        : `<span class="badge" style="background:#dcfce7; color:#166534;">Active</span>`;
+
+      tr.innerHTML = `
+        <td><strong style="font-size:0.95rem;">${inv.code}</strong></td>
+        <td><code>${inv.assignedBadge || "ANY"}</code></td>
+        <td>${inv.assignedRole || "Biomed Staff"}</td>
+        <td>${statusBadge}</td>
+        <td><small style="color:var(--text-muted);">${inv.usedByBadge ? "Used by " + inv.usedByBadge : "Available"}</small></td>
+      `;
+      invitesTableBody.appendChild(tr);
+    });
+  }
+
+  // 2. Fetch Registered Users
   const querySnapshot = await getDocs(collection(db, "users"));
   allUsers = [];
   querySnapshot.forEach(docSnap => allUsers.push(docSnap.data()));
@@ -980,6 +1082,13 @@ window.openAccountsModal = async function() {
     `;
     accountsTableBody.appendChild(tr);
   });
+}
+
+window.openAccountsModal = async function() {
+  if (!accountsModal) return;
+  accountsModal.classList.remove("hidden");
+  if (latestInviteResult) latestInviteResult.classList.add("hidden");
+  await loadAccountsAndInvites();
 };
 
 window.openItUserEditModal = function(badge) {
@@ -990,10 +1099,36 @@ window.openItUserEditModal = function(badge) {
   if (itEditName) itEditName.value = user.name;
   if (itEditBadge) itEditBadge.value = user.badge;
   if (itEditRole) itEditRole.value = user.role;
-  if (itEditEmail) itEditEmail.value = user.badge;
 
   if (itUserEditModal) itUserEditModal.classList.remove("hidden");
 };
+
+if (itUserEditForm) {
+  itUserEditForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const badge = itEditBadge.value.trim().toUpperCase();
+    const newName = itEditName.value.trim();
+    const newRole = itEditRole.value;
+
+    const user = allUsers.find(u => u.badge.toUpperCase() === badge.toUpperCase());
+    if (!user || !user.uid) {
+      alert("Unable to find user UID to update.");
+      return;
+    }
+
+    try {
+      await updateDoc(doc(db, "users", user.uid), {
+        name: newName,
+        role: newRole
+      });
+      alert(`Updated profile for ${badge}`);
+      if (itUserEditModal) itUserEditModal.classList.add("hidden");
+      await loadAccountsAndInvites();
+    } catch (err) {
+      alert("Failed to update user: " + err.message);
+    }
+  });
+}
 
 const closeAccountsModalBtn = document.getElementById("closeAccountsModalBtn");
 const closeAccountsBtn = document.getElementById("closeAccountsBtn");
