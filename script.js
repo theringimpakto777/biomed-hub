@@ -33,7 +33,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Domain mapping
+// Domain mapping: converts badge to internal email unless an email is already typed
 const INTERNAL_DOMAIN = "@hospital.internal";
 function badgeToInternalEmail(badge) {
   const cleaned = (badge || "").trim().toLowerCase().replace(/\s+/g, "");
@@ -193,25 +193,37 @@ function showAuthError(msg) {
   authAlert.classList.remove("hidden");
 }
 
-// Sign In
+// Sign In Handler
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   authAlert.classList.add("hidden");
-  const badge = document.getElementById("loginBadge").value;
+
+  const rawBadge = document.getElementById("loginBadge").value.trim();
   const pass = document.getElementById("loginPassword").value;
-  const email = badgeToInternalEmail(badge);
+  const email = badgeToInternalEmail(rawBadge);
 
   try {
-    await signInWithEmailAndPassword(auth, email, pass);
+    const cred = await signInWithEmailAndPassword(auth, email, pass);
+    console.log("Logged in successfully:", cred.user.uid);
   } catch (err) {
-    showAuthError("Invalid Badge ID or Password. Verify your credentials.");
+    console.error("Sign-in failure details:", err);
+    if (err.code === "auth/invalid-credential" || err.code === "auth/wrong-password") {
+      showAuthError("Incorrect Badge ID or Password. Please re-enter.");
+    } else if (err.code === "auth/user-not-found") {
+      showAuthError(`No account registered under: ${email}`);
+    } else if (err.code === "auth/too-many-requests") {
+      showAuthError("Too many failed attempts. Please wait a moment and try again.");
+    } else {
+      showAuthError(`Login Error [${err.code}]: ${err.message}`);
+    }
   }
 });
 
-// Register
+// Staff Self-Registration Handler
 signupForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   authAlert.classList.add("hidden");
+
   const name = document.getElementById("signupName").value.trim();
   const badge = document.getElementById("signupBadge").value.trim().toUpperCase();
   const role = document.getElementById("signupRole").value;
@@ -225,7 +237,7 @@ signupForm.addEventListener("submit", async (e) => {
   }
 
   try {
-    // Validate Invite Passcode
+    // Check IT invite authorization code
     const inviteDoc = await getDoc(doc(db, "invitations", authCode));
     if (!inviteDoc.exists() || inviteDoc.data().used) {
       showAuthError("Invalid or expired IT Authorization Code.");
@@ -233,14 +245,14 @@ signupForm.addEventListener("submit", async (e) => {
     }
     const invData = inviteDoc.data();
     if (invData.badge && invData.badge.toUpperCase() !== badge) {
-      showAuthError(`Code reserved for Badge: ${invData.badge}`);
+      showAuthError(`This passcode is reserved for Badge ID: ${invData.badge}`);
       return;
     }
 
     const email = badgeToInternalEmail(badge);
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
 
-    // Save User Document
+    // Save profile record in Firestore users collection
     await setDoc(doc(db, "users", cred.user.uid), {
       uid: cred.user.uid,
       name,
@@ -250,48 +262,52 @@ signupForm.addEventListener("submit", async (e) => {
       createdAt: serverTimestamp()
     });
 
-    // Mark Invite as Used
+    // Mark passcode as redeemed
     await updateDoc(doc(db, "invitations", authCode), {
       used: true,
       usedBy: badge,
       usedAt: serverTimestamp()
     });
   } catch (err) {
-    showAuthError(err.message);
+    showAuthError(`Registration Error: ${err.message}`);
   }
 });
 
-// Sign Out
+// Sign Out Handler
 logoutBtn.addEventListener("click", () => signOut(auth));
 
 // ================= SESSION MONITOR =================
 onAuthStateChanged(auth, async (user) => {
   if (user) {
-    const userDoc = await getDoc(doc(db, "users", user.uid));
-    if (userDoc.exists()) {
-      currentUser = userDoc.data();
-    } else {
-      currentUser = {
-        uid: user.uid,
-        name: "Staff User",
-        badge: user.email.split("@")[0].toUpperCase(),
-        role: "Biomed Staff"
-      };
+    try {
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists()) {
+        currentUser = userDoc.data();
+      } else {
+        currentUser = {
+          uid: user.uid,
+          name: "Staff User",
+          badge: user.email.split("@")[0].toUpperCase(),
+          role: "Biomed Staff"
+        };
+      }
+
+      userBadge.innerHTML = `<span>👤</span> <strong>${currentUser.name}</strong> [${currentUser.badge}] (${currentUser.role})`;
+      authScreen.classList.add("hidden");
+      mainApp.classList.remove("hidden");
+
+      if (currentUser.role === "IT Support") {
+        itAdminBanner.classList.remove("hidden");
+        biomedActionButtons.classList.add("hidden");
+      } else {
+        itAdminBanner.classList.add("hidden");
+        biomedActionButtons.classList.remove("hidden");
+      }
+
+      initInventoryListener();
+    } catch (err) {
+      console.error("Session fetch error:", err);
     }
-
-    userBadge.innerHTML = `<span>👤</span> <strong>${currentUser.name}</strong> [${currentUser.badge}] (${currentUser.role})`;
-    authScreen.classList.add("hidden");
-    mainApp.classList.remove("hidden");
-
-    if (currentUser.role === "IT Support") {
-      itAdminBanner.classList.remove("hidden");
-      biomedActionButtons.classList.add("hidden");
-    } else {
-      itAdminBanner.classList.add("hidden");
-      biomedActionButtons.classList.remove("hidden");
-    }
-
-    initInventoryListener();
   } else {
     currentUser = null;
     authScreen.classList.remove("hidden");
