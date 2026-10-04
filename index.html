@@ -2,9 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Biomedical Asset & Spare Parts Registry</title>
   <link rel="stylesheet" href="style.css" />
+  <!-- Font Awesome or icons if needed -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
 <body>
 
@@ -12,277 +14,346 @@
   <div id="authScreen" class="auth-wrapper">
     <div class="auth-card">
       <div class="auth-header">
-        <span class="auth-icon">🏥</span>
-        <h2>Biomedical Engineering Hub</h2>
-        <p>Asset Tracking, Preventive Maintenance & Registry</p>
+        <div class="auth-logo">🏥</div>
+        <h2>Biomedical Asset Registry</h2>
+        <p>Clinical Engineering & Inventory System</p>
       </div>
 
       <div class="auth-tabs">
-        <button id="tabLoginBtn" class="tab-btn active" type="button">Sign In</button>
-        <button id="tabSignupBtn" class="tab-btn" type="button">Register</button>
+        <button id="tabLoginBtn" class="auth-tab-btn active">Sign In</button>
+        <button id="tabSignupBtn" class="auth-tab-btn">Register</button>
       </div>
 
-      <div id="authAlert" class="auth-alert hidden"></div>
+      <div id="authAlert" class="alert-box error hidden"></div>
 
-      <!-- FORM A: LOGIN FORM -->
+      <!-- Sign In Form -->
       <form id="loginForm" class="auth-form">
         <div class="form-group">
-          <label for="loginBadge">Staff / Badge ID</label>
-          <input type="text" id="loginBadge" placeholder="e.g. BME-402 or IT-ADMIN-01" required autocomplete="username" />
+          <label for="loginBadge">Staff Badge ID</label>
+          <input type="text" id="loginBadge" placeholder="e.g. 25868 or BM-01" required />
         </div>
-
         <div class="form-group">
           <label for="loginPassword">Password</label>
-          <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password" />
+          <input type="password" id="loginPassword" placeholder="••••••••" required />
         </div>
-
-        <button type="submit" class="btn btn-primary btn-block">Sign In</button>
-
-        <p class="login-help-note">
-          Forgot your password or badge ID? Please contact <strong>IT Support</strong> for account recovery.
-        </p>
-
-        <!-- Quick Demo Shortcuts -->
-        <div class="quick-login-section">
-          <span class="quick-title">Quick Demo Logins (Clinical Roles):</span>
-          <div class="quick-buttons">
-            <button type="button" class="btn-chip" onclick="fillDemo('staff')">🧰 Biomed Staff</button>
-            <button type="button" class="btn-chip" onclick="fillDemo('supervisor')">🛡️ Biomed Supervisor</button>
-          </div>
-        </div>
+        <button type="submit" class="btn btn-primary btn-block">Sign In to Registry</button>
       </form>
 
-      <!-- FORM B: SIGN UP FORM (SECURED WITH IT AUTHORIZATION CODE) -->
+      <!-- Register Form -->
       <form id="signupForm" class="auth-form hidden">
         <div class="form-group">
           <label for="signupName">Full Name</label>
-          <input type="text" id="signupName" placeholder="e.g., Eng. Tariq Mansoor" required />
+          <input type="text" id="signupName" placeholder="e.g. Emmanuel Domingo" required />
         </div>
-
-        <div class="form-row">
-          <div class="form-group flex-1">
-            <label for="signupBadge">Staff / Badge ID</label>
-            <input type="text" id="signupBadge" placeholder="e.g., BME-402" required />
-          </div>
-          <div class="form-group flex-1">
-            <label for="signupRole">Department Role</label>
-            <select id="signupRole" required>
-              <option value="Biomed Staff">🧰 Biomed Staff (Tech)</option>
-              <option value="Biomed Supervisor">🛡️ Biomed Supervisor</option>
-            </select>
-          </div>
-        </div>
-
         <div class="form-group">
-          <label for="signupAuthCode">IT Authorization / Invite Code</label>
-          <input type="text" id="signupAuthCode" placeholder="e.g., BIO-9482" required autocomplete="off" />
-          <small class="text-muted" style="font-size:0.75rem; margin-top:0.25rem; display:block;">
-            Required for clinical verification. Issued exclusively by IT Support.
-          </small>
+          <label for="signupBadge">Badge ID</label>
+          <input type="text" id="signupBadge" placeholder="e.g. 25868" required />
         </div>
-
-        <div class="form-row">
-          <div class="form-group flex-1">
-            <label for="signupPassword">Password</label>
-            <input type="password" id="signupPassword" placeholder="Minimum 6 characters" required />
-          </div>
-          <div class="form-group flex-1">
-            <label for="signupConfirmPassword">Confirm Password</label>
-            <input type="password" id="signupConfirmPassword" placeholder="Repeat password" required />
-          </div>
+        <div class="form-group">
+          <label for="signupRole">Role</label>
+          <select id="signupRole" required>
+            <option value="Biomed Staff">Biomed Staff</option>
+            <option value="Biomed Supervisor">Biomed Supervisor</option>
+          </select>
         </div>
-
-        <button type="submit" class="btn btn-primary btn-block">Register Account</button>
+        <div class="form-group">
+          <label for="signupAuthCode">IT Authorization Passcode</label>
+          <input type="text" id="signupAuthCode" placeholder="e.g. BIO-1234" required />
+        </div>
+        <div class="form-group">
+          <label for="signupPassword">Password</label>
+          <input type="password" id="signupPassword" placeholder="Min. 6 characters" required />
+        </div>
+        <div class="form-group">
+          <label for="signupConfirmPassword">Confirm Password</label>
+          <input type="password" id="signupConfirmPassword" placeholder="••••••••" required />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Authorize & Register</button>
       </form>
     </div>
   </div>
 
-  <!-- ================= MAIN DASHBOARD APPLICATION ================= -->
-  <div id="mainApp" class="hidden">
-    <header class="navbar">
-      <div class="brand">
+  <!-- ================= MAIN APPLICATION ================= -->
+  <div id="mainApp" class="app-layout hidden">
+    
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="header-brand">
         <span class="brand-icon">🏥</span>
         <div>
           <h1>Biomedical Asset Registry</h1>
-          <span class="subtitle">Clinical Engineering & Inventory System</span>
+          <p class="brand-sub">Clinical Engineering & Inventory System</p>
         </div>
       </div>
-      <div class="user-panel">
-        <div id="userBadge" class="user-badge"></div>
+      <div class="header-user">
+        <div id="userBadge" class="user-chip">
+          <span>🧰</span>
+          <span>Loading Session...</span>
+        </div>
         <button id="logoutBtn" class="btn btn-outline btn-sm">Sign Out</button>
       </div>
     </header>
 
-    <div class="container">
-      <!-- IT ADMIN BANNER -->
-      <div id="itAdminBanner" class="it-banner hidden">
-        <div>
-          <h3>💻 IT Administrative Console</h3>
-          <p>Account provisioning & security invite verification</p>
-        </div>
+    <!-- IT Admin Banner -->
+    <div id="itAdminBanner" class="it-banner hidden">
+      <div class="it-banner-content">
+        <span>💻 <strong>IT Administrative Console:</strong> Read-Only Mode & Access Control Active</span>
         <div class="it-banner-actions">
           <button class="btn btn-sm btn-it" onclick="openAccountsModal()">👥 Manage Accounts & Invites</button>
-          <button class="btn btn-sm btn-outline" onclick="exportDatabaseBackup()">💾 Backup Data</button>
-          <button class="btn btn-sm btn-outline" onclick="runSystemDiagnostics()">⚡ Diagnostics</button>
+          <button class="btn btn-sm btn-it-outline" onclick="exportDatabaseBackup()">⬇️ Export Cloud Backup (JSON)</button>
         </div>
       </div>
+    </div>
 
-      <!-- KPIS -->
+    <main class="app-main">
+      <!-- KPI Cards -->
       <section class="kpi-grid">
-        <div class="kpi-card">
-          <span class="kpi-label">Active Machines</span>
-          <span id="kpiMachines" class="kpi-val">0</span>
+        <div class="kpi-card" id="cardMachines">
+          <div class="kpi-title">ACTIVE MACHINES</div>
+          <div class="kpi-value" id="kpiMachines">0</div>
         </div>
-        <div class="kpi-card">
-          <span class="kpi-label">Spare Parts</span>
-          <span id="kpiParts" class="kpi-val">0</span>
+        <div class="kpi-card" id="cardParts">
+          <div class="kpi-title">SPARE PARTS</div>
+          <div class="kpi-value" id="kpiParts">0</div>
         </div>
-        <div class="kpi-card alert-warning">
-          <span class="kpi-label">Pending Approval</span>
-          <span id="kpiPending" class="kpi-val">0</span>
+        <div class="kpi-card" id="cardPending">
+          <div class="kpi-title">PENDING APPROVAL</div>
+          <div class="kpi-value" id="kpiPending">0</div>
         </div>
       </section>
 
-      <!-- TOOLBAR -->
+      <!-- Action Bar -->
       <section class="toolbar">
-        <div class="toolbar-search">
+        <div class="search-box">
           <input type="text" id="searchInput" placeholder="Search by tag, model, serial, or room..." />
+        </div>
+        <div class="filter-box">
           <select id="statusFilter">
             <option value="ALL">All Statuses</option>
+            <option value="Pending">Pending</option>
             <option value="Approved">Approved</option>
-            <option value="Pending">Pending Approval</option>
             <option value="Needs Clarification">Needs Clarification</option>
           </select>
         </div>
-
-        <div id="biomedActionButtons" class="toolbar-actions">
+        <div id="biomedActionButtons" class="action-buttons">
           <button id="btnAddMachine" class="btn btn-primary">➕ Register Machine</button>
           <button id="btnAddPart" class="btn btn-secondary">🔩 Register Part</button>
         </div>
       </section>
 
-      <!-- INVENTORY DATA TABLE -->
-      <section class="table-card">
-        <table class="data-table">
-      <thead>
-          <tr>
-            <th style="width: 140px;">Part P/N / Asset Tag</th>
-            <th style="width: 90px;">Category</th>
-            <th>Description & Specs</th>
-            <th style="width: 100px;">Attachments</th>
-            <th>Compatible Model / SN</th>
-            <th>Location / Shelf Bin</th>
-            <th style="width: 80px;">Stock</th>
-            <th style="width: 120px;">Status</th>
-            <th class="actions-header" style="text-align: right;">Actions</th>
-          </tr>
-        </thead>
-          <tbody id="inventoryTableBody"></tbody>
+      <!-- Inventory Table -->
+      <section class="table-container">
+        <table class="inventory-table">
+          <thead>
+            <tr>
+              <th style="width: 140px;">Part P/N / Asset Tag</th>
+              <th style="width: 90px;">Category</th>
+              <th>Description & Specs</th>
+              <th style="width: 100px;">Attachments</th>
+              <th>Compatible Model / SN</th>
+              <th>Location / Shelf Bin</th>
+              <th style="width: 80px; text-align: center;">Stock</th>
+              <th style="width: 120px;">Status</th>
+              <th class="actions-header" style="text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="inventoryTableBody">
+            <!-- Dynamically Rendered by script.js -->
+          </tbody>
         </table>
-        <div id="emptyNotice" class="empty-notice hidden">No matching assets or spare parts found.</div>
+        <div id="emptyNotice" class="empty-state hidden">
+          <p>No inventory records found matching your filters.</p>
+        </div>
       </section>
-    </div>
+    </main>
   </div>
 
-  <!-- ================= MODALS ================= -->
-
-  <!-- MODAL 1: ADD / EDIT ASSET -->
+  <!-- ================= MODAL 1: ADD / EDIT ASSET ================= -->
   <div id="itemModal" class="modal-overlay hidden">
     <div class="modal-card">
       <div class="modal-header">
         <h3 id="modalTitle">Register Equipment</h3>
         <button id="closeItemModalBtn" class="close-x">&times;</button>
       </div>
+
       <form id="itemForm">
         <input type="hidden" id="editItemId" />
         <input type="hidden" id="formItemType" value="Machine" />
 
-        <!-- Row 1: Part Number & Description -->
-        <div class="form-row">
-          <div class="form-group flex-1">
-            <label id="lblBiomedTag" for="inputBiomedTag">Hospital Asset / Biomed Tag</label>
-            <input type="text" id="inputBiomedTag" placeholder="e.g. BME-2026-01" required />
+        <!-- CLINICAL MACHINE FORM (MATCHING COMMISSIONING FORMAT) -->
+        <div id="machineFormFields">
+          <!-- Acceptance Date -->
+          <div class="form-group mb-3" style="display: flex; align-items: center; justify-content: space-between;">
+            <label style="font-weight: 700; color: #1e293b;">Acceptance Date <span style="color: red;">*</span> :</label>
+            <span id="displayAcceptanceDate" style="font-weight: 600; color: #334155; width: 60%; text-align: left;"></span>
+            <input type="hidden" id="inputAcceptanceDate" />
           </div>
-          <div class="form-group flex-1">
-            <label id="lblItemName" for="inputName">Machine / Model Name</label>
-            <input type="text" id="inputName" placeholder="e.g. Draeger Fabius Plus" required />
+
+          <!-- Biomed Tag Number -->
+          <div class="form-group mb-3" style="display: flex; align-items: center; justify-content: space-between;">
+            <label for="inputBiomedTag" id="lblBiomedTag" style="font-weight: 700; color: #1e293b;">Biomed Tag Number <span style="color: red;">*</span> :</label>
+            <input type="text" id="inputBiomedTag" placeholder="Biomed Tag Number Only" style="width: 60%;" required />
+          </div>
+
+          <!-- User Badge Number -->
+          <div class="form-group mb-3" style="display: flex; align-items: center; justify-content: space-between;">
+            <label for="inputUserBadge" style="font-weight: 700; color: #1e293b;">User Badge Number <span style="color: red;">*</span> :</label>
+            <input type="text" id="inputUserBadge" placeholder="User Badge Number Only" style="width: 60%; background-color: #f1f5f9; cursor: not-allowed;" readonly required />
+          </div>
+
+          <!-- Grouping Name -->
+          <div class="form-group mb-3" style="display: flex; align-items: center; justify-content: space-between;">
+            <label for="selectGrouping" style="font-weight: 700; color: #1e293b;">Grouping Name <span style="color: red;">*</span> :</label>
+            <select id="selectGrouping" style="width: 60%;">
+              <option value="">--Select Group Type--</option>
+              <option value="Critical Care / ICU">Critical Care / ICU</option>
+              <option value="Operating Theatre (OT)">Operating Theatre (OT)</option>
+              <option value="Diagnostic Imaging">Diagnostic Imaging</option>
+              <option value="Physiotherapy & Rehab">Physiotherapy & Rehab</option>
+              <option value="General Ward / OPD">General Ward / OPD</option>
+              <option value="Laboratory Equipment">Laboratory Equipment</option>
+            </select>
+          </div>
+
+          <!-- Equipment Name -->
+          <div class="form-group mb-3" style="display: flex; align-items: center; justify-content: space-between;">
+            <label for="inputName" id="lblItemName" style="font-weight: 700; color: #1e293b;">Equipment Name <span style="color: red;">*</span> :</label>
+            <select id="inputName" style="width: 60%;">
+              <option value="">--Select Equipment Type--</option>
+              <option value="Mechanical Ventilator">Mechanical Ventilator</option>
+              <option value="Patient Monitor">Patient Monitor</option>
+              <option value="Anesthesia Workstation">Anesthesia Workstation</option>
+              <option value="Defibrillator">Defibrillator</option>
+              <option value="Infusion / Syringe Pump">Infusion / Syringe Pump</option>
+              <option value="Electrosurgical Unit (ESU)">Electrosurgical Unit (ESU)</option>
+              <option value="Shockwave Therapy Unit">Shockwave Therapy Unit</option>
+              <option value="ECG Machine">ECG Machine</option>
+              <option value="Other Medical Device">Other Medical Device</option>
+            </select>
+          </div>
+
+          <!-- Model Name -->
+          <div class="form-group mb-3" style="display: flex; align-items: center; justify-content: space-between;">
+            <label for="inputModelName" style="font-weight: 700; color: #1e293b;">Model Name <span style="color: red;">*</span> :</label>
+            <input type="text" id="inputModelName" placeholder="Model Name / Designation" style="width: 60%;" />
+          </div>
+
+          <!-- Manufacturer Name -->
+          <div class="form-group mb-3" style="display: flex; align-items: center; justify-content: space-between;">
+            <label for="inputManufacturer" style="font-weight: 700; color: #1e293b;">Manufacturer Name <span style="color: red;">*</span> :</label>
+            <select id="inputManufacturer" style="width: 60%;">
+              <option value="">--Select Manufacturer Type--</option>
+              <option value="Draeger">Draeger</option>
+              <option value="GE HealthCare">GE HealthCare</option>
+              <option value="Philips">Philips</option>
+              <option value="Mindray">Mindray</option>
+              <option value="Medtronic">Medtronic</option>
+              <option value="Chinesport">Chinesport</option>
+              <option value="Siemens Healthineers">Siemens Healthineers</option>
+              <option value="Stryker">Stryker</option>
+              <option value="Other">Other Manufacturer</option>
+            </select>
+          </div>
+
+          <!-- Serial Number -->
+          <div class="form-group mb-3" style="display: flex; align-items: center; justify-content: space-between;">
+            <label for="inputIdentifier" id="lblIdentifier" style="font-weight: 700; color: #1e293b;">Serial Number :</label>
+            <input type="text" id="inputIdentifier" placeholder="Serial Number Only" style="width: 60%;" />
+          </div>
+
+          <!-- Location -->
+          <div class="form-group mb-3" style="display: flex; align-items: center; justify-content: space-between;">
+            <label for="selectLocation" id="lblLocation" style="font-weight: 700; color: #1e293b;">Location <span style="color: red;">*</span> :</label>
+            <select id="selectLocation" style="width: 60%;">
+              <option value="">--Select Location--</option>
+              <option value="Building A (Main Hospital)">Building A (Main Hospital)</option>
+              <option value="Building B (Surgical Center)">Building B (Surgical Center)</option>
+              <option value="Building C (Outpatient Clinics)">Building C (Outpatient Clinics)</option>
+              <option value="Emergency Department (ED)">Emergency Department (ED)</option>
+              <option value="Biomedical Workshop">Biomedical Workshop</option>
+            </select>
+          </div>
+
+          <!-- Sub-Location -->
+          <div class="form-group mb-3" style="display: flex; align-items: center; justify-content: space-between;">
+            <label for="selectSubLocation" style="font-weight: 700; color: #1e293b;">Sub-Location <span style="color: red;">*</span> :</label>
+            <select id="selectSubLocation" style="width: 60%;">
+              <option value="">--Select Sub-Location--</option>
+              <option value="Room 101">Room 101</option>
+              <option value="Room 102">Room 102</option>
+              <option value="OR-1">OR-1</option>
+              <option value="OR-2">OR-2</option>
+              <option value="ICU Bed 1-5">ICU Bed 1-5</option>
+              <option value="ICU Bed 6-10">ICU Bed 6-10</option>
+              <option value="CSSD Clean Room">CSSD Clean Room</option>
+              <option value="Workshop Storage Shelf A">Workshop Storage Shelf A</option>
+              <option value="General OPD Waiting Area">General OPD Waiting Area</option>
+            </select>
           </div>
         </div>
 
-        <!-- Row 2: Serial / Compatibility, Location, Quantity -->
-        <div class="form-row">
-          <div class="form-group flex-1">
-            <label id="lblIdentifier" for="inputIdentifier">Factory Serial Number (SN)</label>
-            <input type="text" id="inputIdentifier" placeholder="e.g. SN-99410" required />
+        <!-- SPARE PART SPECIFIC FIELDS -->
+        <div id="partFormFields" class="hidden">
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="inputPartTag">Part SKU / Catalog P/N <span style="color: red;">*</span></label>
+              <input type="text" id="inputPartTag" placeholder="e.g. PN-O2-CELL-01" />
+            </div>
+            <div class="form-group flex-1">
+              <label for="inputPartName">Part Description & Specs <span style="color: red;">*</span></label>
+              <input type="text" id="inputPartName" placeholder="e.g. O2 Sensor Fuel Cell" />
+            </div>
           </div>
-          <div class="form-group flex-1">
-            <label id="lblLocation" for="inputLocation">Physical Location / Ward</label>
-            <input type="text" id="inputLocation" placeholder="e.g. OR-4, ICU-East" required />
-          </div>
-          <div id="partQuantityGroup" class="form-group hidden" style="max-width: 120px;">
-            <label for="inputQuantity">Stock Qty</label>
-            <input type="number" id="inputQuantity" min="0" placeholder="1" value="1" />
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="inputPartCompat">Compatible Machine / Model</label>
+              <input type="text" id="inputPartCompat" placeholder="e.g. Draeger Fabius / Evita XL" />
+            </div>
+            <div class="form-group flex-1">
+              <label for="inputPartLocation">Workshop Bin / Shelf Location</label>
+              <input type="text" id="inputPartLocation" placeholder="e.g. Shelf B, Bin 04" />
+            </div>
+            <div class="form-group" style="max-width: 120px;">
+              <label for="inputQuantity">Quantity</label>
+              <input type="number" id="inputQuantity" min="0" placeholder="1" value="1" />
+            </div>
           </div>
         </div>
 
-       <div class="form-row">
-          <div class="form-group flex-1">
-            <label id="lblBiomedTag" for="inputBiomedTag">Hospital Biomed Tag</label>
-            <input type="text" id="inputBiomedTag" placeholder="e.g. BME-2026-01" required />
-          </div>
-          <div class="form-group flex-1">
-            <label id="lblIdentifier" for="inputIdentifier">Factory Serial Number (SN)</label>
-            <input type="text" id="inputIdentifier" placeholder="e.g. SN-99410" required />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group flex-1">
-            <label id="lblItemName" for="inputName">Machine / Model Name</label>
-            <input type="text" id="inputName" placeholder="e.g. Draeger Fabius Plus" required />
-          </div>
-          <div class="form-group flex-1">
-            <label id="lblLocation" for="inputLocation">Physical Location / Ward</label>
-            <input type="text" id="inputLocation" placeholder="e.g. OR-4, ICU-East" required />
-          </div>
-          <!-- Stock Quantity (Visible only for Spare Parts) -->
-          <div id="partQuantityGroup" class="form-group flex-1 hidden">
-            <label for="inputQuantity">Quantity in Stock</label>
-            <input type="number" id="inputQuantity" min="0" placeholder="e.g. 5" value="1" />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="inputRemarks">Technical Notes & Remarks</label>
+        <!-- Remarks -->
+        <div class="form-group mt-3">
+          <label for="inputRemarks" style="font-weight: 700; color: #1e293b;">Technical Notes & Remarks</label>
           <textarea id="inputRemarks" rows="2" placeholder="Routine maintenance date, replacement history..."></textarea>
         </div>
 
-        <!-- PHOTO UPLOAD & WEBCAM -->
-        <div class="form-group upload-row">
-          <label id="lblPhotoUpload">📷 Equipment Photo</label>
-          <div class="camera-action-buttons">
-            <button type="button" id="btnTriggerCamera" class="btn btn-camera btn-sm">📸 Open Camera</button>
-            <button type="button" id="btnTriggerGallery" class="btn btn-outline btn-sm">📁 Choose Image</button>
-            <input type="file" id="inputPhoto" accept="image/*" class="hidden" />
+        <!-- Camera & Media Attachment Section -->
+        <div class="form-group">
+          <label id="lblPhotoUpload" style="font-weight: 700; color: #1e293b;">📷 Equipment Photo</label>
+          <div class="media-input-bar" style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+            <button type="button" id="btnTriggerCamera" class="btn btn-outline btn-sm">📷 Take Live Photo</button>
+            <button type="button" id="btnTriggerGallery" class="btn btn-outline btn-sm">🖼️ Choose Image</button>
             <input type="file" id="inputCameraCapture" accept="image/*" capture="environment" class="hidden" />
+            <input type="file" id="inputPhoto" accept="image/*" class="hidden" />
           </div>
-          <div id="photoPreviewContainer" class="preview-box hidden">
-            <img id="photoPreviewImg" src="" alt="Asset Preview" />
-            <button type="button" id="removePhotoBtn" class="btn-remove-file">Remove Photo</button>
+          <div id="photoPreviewContainer" class="hidden media-preview-wrapper" style="position: relative; display: inline-block;">
+            <img id="photoPreviewImg" src="" alt="Preview" style="max-height: 120px; border-radius: 4px; border: 1px solid #cbd5e1;" />
+            <button type="button" id="removePhotoBtn" class="btn-remove-chip" style="position: absolute; top: -5px; right: -5px;">×</button>
           </div>
         </div>
 
-        <!-- PDF REPORT UPLOAD -->
-        <div id="pdfUploadGroup" class="form-group upload-row">
-          <label>📑 Calibration / Service Report (PDF)</label>
-          <div class="file-upload-box">
-            <input type="file" id="inputPdf" accept="application/pdf" />
-          </div>
-          <div id="pdfPreviewContainer" class="preview-box hidden">
-            <span class="pdf-tag">📑 <span id="pdfFileName"></span></span>
-            <button type="button" id="removePdfBtn" class="btn-remove-file">Remove PDF</button>
+        <!-- PDF Upload (Machine Only) -->
+        <div id="pdfUploadGroup" class="form-group">
+          <label style="font-weight: 700; color: #1e293b;">📑 Calibration / Service PDF Report (Under 1MB)</label>
+          <input type="file" id="inputPdf" accept="application/pdf" />
+          <div id="pdfPreviewContainer" class="hidden pdf-attached-chip" style="margin-top: 0.5rem;">
+            <span id="pdfFileName"></span>
+            <button type="button" id="removePdfBtn" class="btn-remove-chip">×</button>
           </div>
         </div>
+
+        <!-- Hidden container for legacy part quantity group reference -->
+        <div id="partQuantityGroup" class="hidden"></div>
 
         <div class="modal-footer">
           <button type="button" id="cancelItemModalBtn" class="btn btn-outline">Cancel</button>
@@ -292,170 +363,14 @@
     </div>
   </div>
 
-  <!-- MODAL 2: ASSET DETAILS (DOSSIER) -->
-  <div id="assetDetailModal" class="modal-overlay hidden">
-    <div class="modal-card detail-dossier-card">
-      <div class="modal-header">
-        <div class="dossier-header-title">
-          <span id="detailTypeBadge" class="badge"></span>
-          <h3 id="detailAssetName">Asset Details</h3>
-        </div>
-        <button id="closeDetailModalBtn" class="close-x">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="dossier-grid">
-          <div class="dossier-item">
-            <span class="dossier-label">Biomed Tag</span>
-            <strong id="detailBiomedTag" class="dossier-val font-mono"></strong>
-          </div>
-          <div class="dossier-item">
-            <span class="dossier-label">Identifier / SN</span>
-            <code id="detailIdentifier" class="dossier-val font-mono"></code>
-          </div>
-          <div class="dossier-item">
-            <span class="dossier-label">Location / Ward</span>
-            <span id="detailLocation" class="dossier-val"></span>
-          </div>
-          <div class="dossier-item">
-            <span class="dossier-label">Status</span>
-            <div id="detailStatusContainer" style="margin-top:0.2rem;"></div>
-          </div>
-          <div class="dossier-item">
-            <span class="dossier-label">Submitted By</span>
-            <span id="detailSubmittedBy" class="dossier-val"></span>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <span class="dossier-label">Technical Notes & Remarks</span>
-          <div id="detailNotes" class="dossier-notes-box"></div>
-        </div>
-
-        <div class="dossier-media-section">
-          <h4>Equipment Attachments</h4>
-          <div class="dossier-media-grid">
-            <div class="media-card">
-              <span class="media-title">Equipment Photo</span>
-              <div id="detailPhotoContainer" class="media-content"></div>
-            </div>
-            <div id="detailPdfCard" class="media-card">
-              <span class="media-title">Calibration / Service Report</span>
-              <div id="detailPdfContainer" class="media-content"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div id="detailModalFooter" class="modal-footer">
-        <button type="button" id="closeDetailModalBottomBtn" class="btn btn-outline">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL 3: IT ACCOUNTS & INVITE CODE GENERATOR -->
-  <div id="accountsModal" class="modal-overlay hidden">
-    <div class="modal-card modal-lg">
-      <div class="modal-header">
-        <h3>👥 IT Account Management & Security Codes</h3>
-        <button id="closeAccountsModalBtn" class="close-x">&times;</button>
-      </div>
-
-      <div class="modal-body">
-        <!-- GENERATOR BOX -->
-        <div style="background:#faf5ff; border:1px solid #d6bcfa; border-radius:8px; padding:1rem; margin-bottom:1.25rem;">
-          <h4 style="margin:0 0 0.25rem 0; color:var(--it-accent);">🎟️ Generate Staff Registration Invite</h4>
-          <p style="color:var(--text-muted); font-size:0.8rem; margin:0 0 0.75rem 0;">Create a one-time passcode for a technician before they register.</p>
-          <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-            <input type="text" id="genBadge" placeholder="Staff Badge ID (e.g. BM-02)" style="flex:1; padding:0.45rem 0.65rem; border:1px solid var(--border-color); border-radius:6px;" />
-            <select id="genRole" style="padding:0.45rem 0.65rem; border:1px solid var(--border-color); border-radius:6px;">
-              <option value="Biomed Staff">Biomed Staff</option>
-              <option value="Biomed Supervisor">Biomed Supervisor</option>
-            </select>
-            <button type="button" class="btn btn-it" onclick="handleGenerateInvite()">Create Passcode</button>
-          </div>
-          <div id="latestInviteResult" class="hidden" style="margin-top:0.6rem; padding:0.6rem; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; font-size:0.85rem;"></div>
-        </div>
-
-        <h4 style="margin:1rem 0 0.5rem 0;">Invite Codes</h4>
-        <div class="table-card" style="max-height:160px; overflow-y:auto; margin-bottom:1.5rem;">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Invite Code</th>
-                <th>Assigned Badge</th>
-                <th>Target Role</th>
-                <th>Status</th>
-                <th>Usage</th>
-              </tr>
-            </thead>
-            <tbody id="invitesTableBody"></tbody>
-          </table>
-        </div>
-
-        <h4 style="margin:0 0 0.5rem 0;">Registered Staff Directory</h4>
-        <div class="table-card" style="max-height:200px; overflow-y:auto;">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Full Name</th>
-                <th>Badge ID</th>
-                <th>Role</th>
-                <th class="actions-header">Action</th>
-              </tr>
-            </thead>
-            <tbody id="accountsTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" id="closeAccountsBtn" class="btn btn-outline">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL 4: IT USER EDIT -->
-  <div id="itUserEditModal" class="modal-overlay hidden">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3>✏️ Edit Staff Account</h3>
-        <button id="closeItUserEditModalBtn" class="close-x">&times;</button>
-      </div>
-      <form id="itUserEditForm">
-        <input type="hidden" id="itEditUserOriginalEmail" />
-        <div class="form-group">
-          <label>Full Name</label>
-          <input type="text" id="itEditName" required />
-        </div>
-        <div class="form-row">
-          <div class="form-group flex-1">
-            <label>Badge ID</label>
-            <input type="text" id="itEditBadge" required />
-          </div>
-          <div class="form-group flex-1">
-            <label>Department Role</label>
-            <select id="itEditRole" required>
-              <option value="Biomed Staff">Biomed Staff</option>
-              <option value="Biomed Supervisor">Biomed Supervisor</option>
-              <option value="IT Support">IT Support</option>
-            </select>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" id="cancelItUserEditBtn" class="btn btn-outline">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save Changes</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL 5: DESKTOP WEBCAM -->
+  <!-- ================= MODAL 2: LIVE DESKTOP WEBCAM ================= -->
   <div id="liveCameraModal" class="modal-overlay hidden">
-    <div class="modal-card live-camera-card">
+    <div class="modal-card camera-card">
       <div class="modal-header">
-        <h3>Live Camera</h3>
+        <h3>📷 Capture Equipment Photo</h3>
         <button id="closeLiveCameraBtn" class="close-x">&times;</button>
       </div>
-      <div class="live-camera-body">
+      <div class="camera-body">
         <video id="cameraVideo" autoplay playsinline></video>
         <canvas id="cameraCanvas" class="hidden"></canvas>
       </div>
@@ -466,28 +381,87 @@
     </div>
   </div>
 
-  <!-- MODAL 6: LIGHTBOX IMAGE VIEWER -->
-  <div id="imageViewerModal" class="modal-overlay hidden">
-    <div class="modal-card photo-lightbox-card">
+  <!-- ================= MODAL 3: ASSET DOSSIER DETAIL ================= -->
+  <div id="assetDetailModal" class="modal-overlay hidden">
+    <div class="modal-card detail-card">
       <div class="modal-header">
-        <h3 id="imageViewerTitle">Photo Preview</h3>
-        <button id="closeImageViewerBtn" class="close-x">&times;</button>
+        <div>
+          <span id="detailTypeBadge" class="badge">Machine</span>
+          <h3 id="detailAssetName" style="margin-top: 0.25rem;">Equipment Name</h3>
+        </div>
+        <button id="closeDetailModalBtn" class="close-x">&times;</button>
       </div>
-      <div class="image-viewer-body">
-        <img id="imageViewerImg" src="" alt="Enlarged preview" />
+      <div class="detail-body">
+        <div class="detail-meta-grid">
+          <div>
+            <label>Hospital Tag / SKU:</label>
+            <strong id="detailBiomedTag">---</strong>
+          </div>
+          <div>
+            <label>Serial / Model ID:</label>
+            <code id="detailIdentifier">---</code>
+          </div>
+          <div>
+            <label>Physical Location:</label>
+            <span id="detailLocation">---</span>
+          </div>
+          <div>
+            <label>Verification Status:</label>
+            <div id="detailStatusContainer"></div>
+          </div>
+          <div style="grid-column: span 2;">
+            <label>Registered By:</label>
+            <span id="detailSubmittedBy">---</span>
+          </div>
+          <div style="grid-column: span 2;">
+            <label>Technical Notes & Remarks:</label>
+            <p id="detailNotes" class="detail-notes-box"></p>
+          </div>
+        </div>
+
+        <!-- Attached Photo -->
+        <div class="detail-media-section">
+          <h4>Equipment Photo</h4>
+          <div id="detailPhotoContainer"></div>
+        </div>
+
+        <!-- Attached PDF Report -->
+        <div id="detailPdfCard" class="detail-media-section hidden">
+          <h4>Service / Calibration Documentation</h4>
+          <div id="detailPdfContainer"></div>
+        </div>
+      </div>
+      <div id="detailModalFooter" class="modal-footer">
+        <button type="button" id="closeDetailModalBottomBtn" class="btn btn-outline">Close</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL 7: CLARIFICATION MODAL -->
+  <!-- ================= MODAL 4: IMAGE LIGHTBOX VIEWER ================= -->
+  <div id="imageViewerModal" class="modal-overlay hidden">
+    <div class="modal-card viewer-card">
+      <div class="modal-header">
+        <h3 id="imageViewerTitle">Equipment Photo</h3>
+        <button id="closeImageViewerBtn" class="close-x">&times;</button>
+      </div>
+      <div class="viewer-body">
+        <img id="imageViewerImg" src="" alt="Enlarged" />
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 5: SUPERVISOR CLARIFICATION ================= -->
   <div id="clarifyModal" class="modal-overlay hidden">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>Request Supervisor Clarification</h3>
+        <h3>💬 Request Technical Clarification</h3>
         <button id="closeClarifyModalBtn" class="close-x">&times;</button>
       </div>
       <div class="modal-body">
-        <textarea id="clarifyNoteInput" rows="4" placeholder="Specify calibration details or missing photos needed from technician..."></textarea>
+        <p style="font-size:0.9rem; color:#64748b; margin-bottom: 0.5rem;">
+          Specify what missing specs, serial numbers, or calibration details the technician needs to provide:
+        </p>
+        <textarea id="clarifyNoteInput" rows="4" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.5rem;" placeholder="e.g. Serial number tag is blurred, please re-upload clear photo of rating plate..."></textarea>
       </div>
       <div class="modal-footer">
         <button type="button" id="cancelClarifyBtn" class="btn btn-outline">Cancel</button>
@@ -496,7 +470,97 @@
     </div>
   </div>
 
-  <!-- APPLICATION SCRIPT ENTRY -->
+  <!-- ================= MODAL 6: IT ACCOUNTS & INVITES ================= -->
+  <div id="accountsModal" class="modal-overlay hidden">
+    <div class="modal-card wide-card">
+      <div class="modal-header">
+        <h3>👥 IT Access Control & Passcodes</h3>
+        <button id="closeAccountsModalBtn" class="close-x">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- Passcode Generator -->
+        <div class="invite-gen-box" style="background: #f8fafc; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid #e2e8f0;">
+          <h4 style="margin-top:0;">Generate Staff Registration Passcode</h4>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+            <input type="text" id="genBadge" placeholder="Target Badge ID (e.g. 23422)" style="flex: 1;" />
+            <select id="genRole" style="flex: 1;">
+              <option value="Biomed Staff">Biomed Staff</option>
+              <option value="Biomed Supervisor">Biomed Supervisor</option>
+            </select>
+            <button type="button" class="btn btn-primary" onclick="handleGenerateInvite()">Create Passcode</button>
+          </div>
+          <div id="latestInviteResult" class="hidden" style="margin-top: 0.75rem; padding: 0.5rem; background: #ede9fe; border-radius: 4px;"></div>
+        </div>
+
+        <!-- Invites Table -->
+        <h4>Issued Authorization Codes</h4>
+        <table class="inventory-table" style="margin-bottom: 1.5rem;">
+          <thead>
+            <tr>
+              <th>Passcode</th>
+              <th>Assigned Badge</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Usage Info</th>
+            </tr>
+          </thead>
+          <tbody id="invitesTableBody"></tbody>
+        </table>
+
+        <!-- Users Table -->
+        <h4>Registered System Users</h4>
+        <table class="inventory-table">
+          <thead>
+            <tr>
+              <th>Staff Name</th>
+              <th>Badge ID</th>
+              <th>Department Role</th>
+              <th style="text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="accountsTableBody"></tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="closeAccountsBtn" class="btn btn-outline">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 7: IT USER EDIT ================= -->
+  <div id="itUserEditModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>✏️️ Edit Staff Credentials</h3>
+        <button id="closeItUserEditModalBtn" class="close-x">&times;</button>
+      </div>
+      <form id="itUserEditForm">
+        <input type="hidden" id="itEditUserOriginalEmail" />
+        <div class="form-group mb-3">
+          <label for="itEditName">Staff Full Name</label>
+          <input type="text" id="itEditName" required />
+        </div>
+        <div class="form-group mb-3">
+          <label for="itEditBadge">Badge ID</label>
+          <input type="text" id="itEditBadge" readonly style="background:#f1f5f9; cursor:not-allowed;" />
+        </div>
+        <div class="form-group mb-3">
+          <label for="itEditRole">Assigned Role</label>
+          <select id="itEditRole">
+            <option value="Biomed Staff">Biomed Staff</option>
+            <option value="Biomed Supervisor">Biomed Supervisor</option>
+            <option value="IT Support">IT Support</option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="cancelItUserEditBtn" class="btn btn-outline">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update Profile</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Cloud Script -->
   <script type="module" src="script.js"></script>
 </body>
 </html>
