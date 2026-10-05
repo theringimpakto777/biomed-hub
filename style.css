@@ -586,16 +586,6 @@ body {
   padding-right: 0.4rem;      /* Prevents content from clipping against the scrollbar */
 }
 
-/* Equipment Inventory Dropdown Container */
-.eq-inventory-container {
-  background: #ffffff;
-  border: 1px solid #dcfce7;
-  border-radius: 8px;
-  margin-bottom: 1.25rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  max-width: 290px;
-}
-
 /* ================= EQUIPMENT INVENTORY (FULL-WIDTH DROPDOWN) ================= */
 .eq-inventory-container {
   background: #ffffff;
