@@ -46,6 +46,7 @@ let allUsers = [];
 let allInvites = [];
 let currentUser = null;
 let currentTypeTab = "ALL"; // 'ALL', 'Machine', or 'Part'
+let currentEqFilterType = "ALL"; // Equipment Inventory Pill Filter
 let activeClarifyItemId = null;
 
 let currentPhotoBase64 = null;
@@ -55,29 +56,42 @@ let videoStream = null;
 
 // ================= DOM ELEMENTS =================
 const authScreen = document.getElementById("authScreen");
-const mainApp = document.getElementById("appContainer"); // Updated to match index.html
+const mainApp = document.getElementById("appContainer");
 const authAlert = document.getElementById("authAlert");
 const loginForm = document.getElementById("loginForm");
 const signupForm = document.getElementById("signupForm");
 const tabLoginBtn = document.getElementById("tabLoginBtn");
 const tabSignupBtn = document.getElementById("tabSignupBtn");
-const userBadge = document.getElementById("userDisplayName"); // Updated to match index.html
-const logoutBtn = document.getElementById("btnSignOut"); // Updated to match index.html
+const userBadge = document.getElementById("userDisplayName");
+const logoutBtn = document.getElementById("btnSignOut");
 const itAdminBanner = document.getElementById("itAdminBanner");
 const biomedActionButtons = document.getElementById("biomedActionButtons");
 
 // KPIs
-const kpiMachines = document.getElementById("kpiActiveMachines"); // Updated to match index.html
-const kpiParts = document.getElementById("kpiSpareParts"); // Updated to match index.html
-const kpiPending = document.getElementById("kpiPendingApproval"); // Updated to match index.html
+const kpiMachines = document.getElementById("kpiActiveMachines");
+const kpiParts = document.getElementById("kpiSpareParts");
+const kpiPending = document.getElementById("kpiPendingApproval");
 const cardMachines = document.getElementById("cardMachines");
 const cardParts = document.getElementById("cardParts");
 
-// Search & Filter
+// Search & Filter (Dashboard)
 const searchInput = document.getElementById("searchInput");
 const statusFilter = document.getElementById("statusFilter");
 const inventoryTableBody = document.getElementById("inventoryTableBody");
 const emptyNotice = document.getElementById("emptyNotice");
+
+// Search & Filter (Equipment Inventory Page)
+const eqSearchInput = document.getElementById("eqSearchInput");
+const eqAreaFilter = document.getElementById("eqAreaFilter");
+const equipmentTableBody = document.getElementById("equipmentTableBody");
+
+// Sidebar & Multi-View Elements
+const navDashboard = document.getElementById("navDashboard");
+const navInventory = document.getElementById("navInventory");
+const navSpareParts = document.getElementById("navSpareParts");
+const viewDashboard = document.getElementById("viewDashboard");
+const viewInventory = document.getElementById("viewInventory");
+const pageTitleDisplay = document.getElementById("pageTitleDisplay");
 
 // Add / Edit Modal Elements
 const itemModal = document.getElementById("itemModal");
@@ -87,8 +101,9 @@ const editItemId = document.getElementById("editItemId");
 const formItemType = document.getElementById("formItemType");
 const machineFormFields = document.getElementById("machineFormFields");
 const partFormFields = document.getElementById("partFormFields");
-const btnAddMachine = document.getElementById("btnRegisterMachine"); // Updated to match index.html
-const btnAddPart = document.getElementById("btnRegisterPart"); // Updated to match index.html
+const btnAddMachine = document.getElementById("btnRegisterMachine");
+const btnAddPart = document.getElementById("btnRegisterPart");
+const btnQuickAddEquipment = document.getElementById("btnQuickAddEquipment");
 const closeItemModalBtn = document.getElementById("closeItemModalBtn");
 const cancelItemModalBtn = document.getElementById("cancelItemModalBtn");
 
@@ -172,106 +187,114 @@ const accountsTableBody = document.getElementById("accountsTableBody");
 const invitesTableBody = document.getElementById("invitesTableBody");
 
 // ================= AUTHENTICATION LOGIC =================
-tabLoginBtn.addEventListener("click", () => {
-  tabLoginBtn.classList.add("active");
-  tabSignupBtn.classList.remove("active");
-  loginForm.classList.remove("hidden");
-  signupForm.classList.add("hidden");
-  authAlert.classList.add("hidden");
-});
+if (tabLoginBtn && tabSignupBtn) {
+  tabLoginBtn.addEventListener("click", () => {
+    tabLoginBtn.classList.add("active");
+    tabSignupBtn.classList.remove("active");
+    loginForm.classList.remove("hidden");
+    signupForm.classList.add("hidden");
+    authAlert.classList.add("hidden");
+  });
 
-tabSignupBtn.addEventListener("click", () => {
-  tabSignupBtn.classList.add("active");
-  tabLoginBtn.classList.remove("active");
-  signupForm.classList.remove("hidden");
-  loginForm.classList.add("hidden");
-  authAlert.classList.add("hidden");
-});
+  tabSignupBtn.addEventListener("click", () => {
+    tabSignupBtn.classList.add("active");
+    tabLoginBtn.classList.remove("active");
+    signupForm.classList.remove("hidden");
+    loginForm.classList.add("hidden");
+    authAlert.classList.add("hidden");
+  });
+}
 
 function showAuthError(msg) {
+  if (!authAlert) return;
   authAlert.textContent = msg;
   authAlert.classList.remove("hidden");
 }
 
 // Sign In Handler
-loginForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  authAlert.classList.add("hidden");
+if (loginForm) {
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (authAlert) authAlert.classList.add("hidden");
 
-  const rawBadge = document.getElementById("loginBadge").value.trim();
-  const pass = document.getElementById("loginPassword").value;
-  const email = badgeToInternalEmail(rawBadge);
+    const rawBadge = document.getElementById("loginBadge").value.trim();
+    const pass = document.getElementById("loginPassword").value;
+    const email = badgeToInternalEmail(rawBadge);
 
-  try {
-    const cred = await signInWithEmailAndPassword(auth, email, pass);
-    console.log("Logged in successfully:", cred.user.uid);
-  } catch (err) {
-    console.error("Sign-in failure details:", err);
-    if (err.code === "auth/invalid-credential" || err.code === "auth/wrong-password") {
-      showAuthError("Incorrect Badge ID or Password. Please re-enter.");
-    } else if (err.code === "auth/user-not-found") {
-      showAuthError(`No account registered under: ${email}`);
-    } else if (err.code === "auth/too-many-requests") {
-      showAuthError("Too many failed attempts. Please wait a moment and try again.");
-    } else {
-      showAuthError(`Login Error [${err.code}]: ${err.message}`);
+    try {
+      const cred = await signInWithEmailAndPassword(auth, email, pass);
+      console.log("Logged in successfully:", cred.user.uid);
+    } catch (err) {
+      console.error("Sign-in failure details:", err);
+      if (err.code === "auth/invalid-credential" || err.code === "auth/wrong-password") {
+        showAuthError("Incorrect Badge ID or Password. Please re-enter.");
+      } else if (err.code === "auth/user-not-found") {
+        showAuthError(`No account registered under: ${email}`);
+      } else if (err.code === "auth/too-many-requests") {
+        showAuthError("Too many failed attempts. Please wait a moment and try again.");
+      } else {
+        showAuthError(`Login Error [${err.code}]: ${err.message}`);
+      }
     }
-  }
-});
+  });
+}
 
 // Staff Self-Registration Handler
-signupForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  authAlert.classList.add("hidden");
+if (signupForm) {
+  signupForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (authAlert) authAlert.classList.add("hidden");
 
-  const name = document.getElementById("signupName").value.trim();
-  const badge = document.getElementById("signupBadge").value.trim().toUpperCase();
-  const role = document.getElementById("signupRole").value;
-  const authCode = document.getElementById("signupAuthCode").value.trim().toUpperCase();
-  const pass = document.getElementById("signupPassword").value;
-  const confirmPass = document.getElementById("signupConfirmPassword").value;
+    const name = document.getElementById("signupName").value.trim();
+    const badge = document.getElementById("signupBadge").value.trim().toUpperCase();
+    const role = document.getElementById("signupRole").value;
+    const authCode = document.getElementById("signupAuthCode").value.trim().toUpperCase();
+    const pass = document.getElementById("signupPassword").value;
+    const confirmPass = document.getElementById("signupConfirmPassword").value;
 
-  if (pass !== confirmPass) {
-    showAuthError("Passwords do not match.");
-    return;
-  }
-
-  try {
-    // Check IT invite authorization code
-    const inviteDoc = await getDoc(doc(db, "invitations", authCode));
-    if (!inviteDoc.exists() || inviteDoc.data().used) {
-      showAuthError("Invalid or expired IT Authorization Code.");
-      return;
-    }
-    const invData = inviteDoc.data();
-    if (invData.badge && invData.badge.toUpperCase() !== badge) {
-      showAuthError(`This passcode is reserved for Badge ID: ${invData.badge}`);
+    if (pass !== confirmPass) {
+      showAuthError("Passwords do not match.");
       return;
     }
 
-    const email = badgeToInternalEmail(badge);
-    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    try {
+      // Check IT invite authorization code
+      const inviteDoc = await getDoc(doc(db, "invitations", authCode));
+      if (!inviteDoc.exists() || inviteDoc.data().used) {
+        showAuthError("Invalid or expired IT Authorization Code.");
+        return;
+      }
+      const invData = inviteDoc.data();
+      if (invData.badge && invData.badge.toUpperCase() !== badge) {
+        showAuthError(`This passcode is reserved for Badge ID: ${invData.badge}`);
+        return;
+      }
 
-    // Save profile record in Firestore users collection
-    await setDoc(doc(db, "users", cred.user.uid), {
-      uid: cred.user.uid,
-      name,
-      badge,
-      role,
-      email,
-      createdAt: serverTimestamp()
-    });
+      const assignedRole = invData.role || role;
+      const email = badgeToInternalEmail(badge);
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
 
-    // Mark passcode as redeemed
-    await updateDoc(doc(db, "invitations", authCode), {
-      used: true,
-      usedBy: badge,
-      usedAt: serverTimestamp()
-    });
-  } catch (err) {
-    showAuthError(`Registration Error: ${err.message}`);
-  }
-});
+      // Save profile record in Firestore users collection
+      await setDoc(doc(db, "users", cred.user.uid), {
+        uid: cred.user.uid,
+        name,
+        badge,
+        role: assignedRole,
+        email,
+        createdAt: serverTimestamp()
+      });
+
+      // Mark passcode as redeemed
+      await updateDoc(doc(db, "invitations", authCode), {
+        used: true,
+        usedBy: badge,
+        usedAt: serverTimestamp()
+      });
+    } catch (err) {
+      showAuthError(`Registration Error: ${err.message}`);
+    }
+  });
+}
 
 // Sign Out Handler
 if (logoutBtn) {
@@ -294,16 +317,18 @@ onAuthStateChanged(auth, async (user) => {
         };
       }
 
-      userBadge.innerHTML = `<span>👤</span> <strong>${currentUser.name}</strong> [${currentUser.badge}] (${currentUser.role})`;
-      authScreen.classList.add("hidden");
-      mainApp.classList.remove("hidden");
+      if (userBadge) {
+        userBadge.innerHTML = `<span>👤</span> <strong>${currentUser.name}</strong> [${currentUser.badge}] (${currentUser.role})`;
+      }
+      if (authScreen) authScreen.classList.add("hidden");
+      if (mainApp) mainApp.classList.remove("hidden");
 
-      if (currentUser.role === "IT Support") {
-        itAdminBanner.classList.remove("hidden");
-        biomedActionButtons.classList.add("hidden");
-      } else {
-        itAdminBanner.classList.add("hidden");
-        biomedActionButtons.classList.remove("hidden");
+      if (itAdminBanner) {
+        if (currentUser.role === "IT Support") {
+          itAdminBanner.classList.remove("hidden");
+        } else {
+          itAdminBanner.classList.add("hidden");
+        }
       }
 
       initInventoryListener();
@@ -312,8 +337,8 @@ onAuthStateChanged(auth, async (user) => {
     }
   } else {
     currentUser = null;
-    authScreen.classList.remove("hidden");
-    mainApp.classList.add("hidden");
+    if (authScreen) authScreen.classList.remove("hidden");
+    if (mainApp) mainApp.classList.add("hidden");
   }
 });
 
@@ -326,6 +351,7 @@ function initInventoryListener() {
     });
     updateKPIs();
     renderTable();
+    renderEquipmentTable();
   });
 }
 
@@ -335,9 +361,9 @@ function updateKPIs() {
   const parts = inventory.filter((i) => i.type === "Part").length;
   const pending = inventory.filter((i) => i.status === "Pending").length;
 
-  kpiMachines.textContent = machines;
-  kpiParts.textContent = parts;
-  kpiPending.textContent = pending;
+  if (kpiMachines) kpiMachines.textContent = machines;
+  if (kpiParts) kpiParts.textContent = parts;
+  if (kpiPending) kpiPending.textContent = pending;
 }
 
 function setTypeFilterTab(type) {
@@ -347,7 +373,6 @@ function setTypeFilterTab(type) {
     currentTypeTab = type;
   }
 
-  // Visual card highlighting (with safe checks)
   if (cardMachines) {
     cardMachines.style.outline = currentTypeTab === "Machine" ? "2px solid var(--primary)" : "none";
   }
@@ -358,17 +383,18 @@ function setTypeFilterTab(type) {
   renderTable();
 }
 
-// SAFE EVENT LISTENERS (Prevents line 277 crash)
 if (cardMachines) {
   cardMachines.addEventListener("click", () => setTypeFilterTab("Machine"));
 }
 if (cardParts) {
   cardParts.addEventListener("click", () => setTypeFilterTab("Part"));
 }
-// ================= TABLE RENDERING =================
+
+// ================= DASHBOARD TABLE RENDERING =================
 function renderTable() {
-  const q = searchInput.value.toLowerCase().trim();
-  const stFilter = statusFilter.value;
+  if (!inventoryTableBody) return;
+  const q = searchInput ? searchInput.value.toLowerCase().trim() : "";
+  const stFilter = statusFilter ? statusFilter.value : "ALL";
 
   const filtered = inventory.filter((item) => {
     const matchesSearch =
@@ -385,10 +411,10 @@ function renderTable() {
 
   inventoryTableBody.innerHTML = "";
   if (filtered.length === 0) {
-    emptyNotice.classList.remove("hidden");
+    if (emptyNotice) emptyNotice.classList.remove("hidden");
     return;
   }
-  emptyNotice.classList.add("hidden");
+  if (emptyNotice) emptyNotice.classList.add("hidden");
 
   filtered.forEach((item) => {
     const tr = document.createElement("tr");
@@ -406,7 +432,6 @@ function renderTable() {
         ? `<span class="badge" style="background:#e0e7ff; color:#4338ca;">${item.quantity ?? 1}</span>`
         : `<span style="color:var(--text-muted); font-size:0.8rem;">—</span>`;
 
-    // Attachments indicator
     let attachmentsHtml = `<div style="display:flex; gap:0.35rem;">`;
     if (item.photoData) {
       attachmentsHtml += `<span title="Photo Attached" style="cursor:pointer;" onclick="openAssetDetailModal('${item.id}')">📷</span>`;
@@ -419,7 +444,6 @@ function renderTable() {
     }
     attachmentsHtml += `</div>`;
 
-    // Actions depending on Role
     let actionsHtml = `<div style="display:flex; gap:0.35rem; justify-content:flex-end;">`;
     actionsHtml += `<button class="btn btn-outline btn-sm" onclick="openAssetDetailModal('${item.id}')">👁 View</button>`;
 
@@ -460,409 +484,10 @@ function renderTable() {
   });
 }
 
-searchInput.addEventListener("input", renderTable);
-statusFilter.addEventListener("change", renderTable);
+if (searchInput) searchInput.addEventListener("input", renderTable);
+if (statusFilter) statusFilter.addEventListener("change", renderTable);
 
-// ================= MODAL: REGISTER MACHINE / PART =================
-if (btnAddMachine) {
-  btnAddMachine.addEventListener("click", () => {
-    itemForm.reset();
-    editItemId.value = "";
-    formItemType.value = "Machine";
-    modalTitle.textContent = "Register Medical Equipment";
-
-    // Switch form layout
-    machineFormFields.classList.remove("hidden");
-    partFormFields.classList.add("hidden");
-    pdfUploadGroup.classList.remove("hidden");
-
-    // Format Acceptance Date
-    const today = new Date();
-    const formattedDate = today.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "2-digit" });
-    displayAcceptanceDate.textContent = formattedDate;
-    inputAcceptanceDate.value = formattedDate;
-
-    // Pre-fill Badge
-    inputUserBadge.value = currentUser ? currentUser.badge : "";
-
-    clearAttachmentPreviews();
-    itemModal.classList.remove("hidden");
-  });
-}
-
-if (btnAddPart) {
-  btnAddPart.addEventListener("click", () => {
-    itemForm.reset();
-    editItemId.value = "";
-    formItemType.value = "Part";
-    modalTitle.textContent = "Register Spare Part / Consumable";
-
-    // Switch form layout
-    machineFormFields.classList.add("hidden");
-    partFormFields.classList.remove("hidden");
-    pdfUploadGroup.classList.add("hidden");
-
-    clearAttachmentPreviews();
-    itemModal.classList.remove("hidden");
-  });
-}
-
-
-closeItemModalBtn.addEventListener("click", () => itemModal.classList.add("hidden"));
-cancelItemModalBtn.addEventListener("click", () => itemModal.classList.add("hidden"));
-
-// Form Submit Handler
-itemForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const type = formItemType.value;
-  const isEditing = !!editItemId.value;
-
-  let payload = {
-    type,
-    updatedAt: serverTimestamp()
-  };
-
-  if (type === "Machine") {
-    const loc = selectLocation.value && selectSubLocation.value 
-      ? `${selectLocation.value} - ${selectSubLocation.value}` 
-      : selectLocation.value || "";
-
-    payload = {
-      ...payload,
-      biomedTag: inputBiomedTag.value.trim().toUpperCase(),
-      acceptanceDate: inputAcceptanceDate.value,
-      userBadge: inputUserBadge.value.trim(),
-      grouping: selectGrouping.value,
-      name: inputName.value,
-      modelName: inputModelName.value.trim(),
-      manufacturer: inputManufacturer.value,
-      identifier: inputIdentifier.value.trim(),
-      location: loc,
-      notes: inputRemarks.value.trim(),
-      photoData: currentPhotoBase64,
-      pdfData: currentPdfBase64,
-      pdfName: currentPdfFileName
-    };
-  } else {
-    payload = {
-      ...payload,
-      biomedTag: inputPartTag.value.trim().toUpperCase(),
-      name: inputPartName.value.trim(),
-      identifier: inputPartCompat.value.trim(),
-      location: inputPartLocation.value.trim(),
-      quantity: parseInt(inputQuantity.value, 10) || 1,
-      notes: inputRemarks.value.trim(),
-      photoData: currentPhotoBase64,
-      pdfData: null,
-      pdfName: null
-    };
-  }
-
-  if (!isEditing) {
-    payload.createdAt = serverTimestamp();
-    payload.submittedBy = currentUser ? currentUser.name : "Staff";
-    payload.status = "Pending";
-    await setDoc(doc(collection(db, "inventory")), payload);
-  } else {
-    await updateDoc(doc(db, "inventory", editItemId.value), payload);
-  }
-
-  itemModal.classList.add("hidden");
-});
-
-// Edit Existing Item
-window.editItem = function (id) {
-  const item = inventory.find((i) => i.id === id);
-  if (!item) return;
-
-  itemForm.reset();
-  editItemId.value = item.id;
-  formItemType.value = item.type;
-  modalTitle.textContent = `Edit ${item.type}: ${item.biomedTag}`;
-
-  if (item.type === "Machine") {
-    machineFormFields.classList.remove("hidden");
-    partFormFields.classList.add("hidden");
-    pdfUploadGroup.classList.remove("hidden");
-
-    displayAcceptanceDate.textContent = item.acceptanceDate || "N/A";
-    inputAcceptanceDate.value = item.acceptanceDate || "";
-    inputBiomedTag.value = item.biomedTag || "";
-    inputUserBadge.value = item.userBadge || "";
-    selectGrouping.value = item.grouping || "";
-    inputName.value = item.name || "";
-    inputModelName.value = item.modelName || "";
-    inputManufacturer.value = item.manufacturer || "";
-    inputIdentifier.value = item.identifier || "";
-  } else {
-    machineFormFields.classList.add("hidden");
-    partFormFields.classList.remove("hidden");
-    pdfUploadGroup.classList.add("hidden");
-
-    inputPartTag.value = item.biomedTag || "";
-    inputPartName.value = item.name || "";
-    inputPartCompat.value = item.identifier || "";
-    inputPartLocation.value = item.location || "";
-    inputQuantity.value = item.quantity || 1;
-  }
-
-  inputRemarks.value = item.notes || "";
-
-  // Pre-fill existing photo / pdf
-  currentPhotoBase64 = item.photoData || null;
-  if (currentPhotoBase64) {
-    photoPreviewImg.src = currentPhotoBase64;
-    photoPreviewContainer.classList.remove("hidden");
-  } else {
-    photoPreviewContainer.classList.add("hidden");
-  }
-
-  currentPdfBase64 = item.pdfData || null;
-  currentPdfFileName = item.pdfName || null;
-  if (currentPdfBase64) {
-    pdfFileName.textContent = currentPdfFileName || "Attached Document.pdf";
-    pdfPreviewContainer.classList.remove("hidden");
-  } else {
-    pdfPreviewContainer.classList.add("hidden");
-  }
-
-  itemModal.classList.remove("hidden");
-};
-
-// ================= ATTACHMENTS (PHOTO & PDF) =================
-function clearAttachmentPreviews() {
-  currentPhotoBase64 = null;
-  currentPdfBase64 = null;
-  currentPdfFileName = null;
-  photoPreviewContainer.classList.add("hidden");
-  pdfPreviewContainer.classList.add("hidden");
-  inputPhoto.value = "";
-  inputCameraCapture.value = "";
-  inputPdf.value = "";
-}
-
-btnTriggerGallery.addEventListener("click", () => inputPhoto.click());
-btnTriggerCamera.addEventListener("click", () => {
-  // Mobile fallback or desktop webcam
-  if (/Android|iPhone|iPad/i.test(navigator.userAgent)) {
-    inputCameraCapture.click();
-  } else {
-    openWebcam();
-  }
-});
-
-// File input image reader
-function handleImageFile(file) {
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    currentPhotoBase64 = e.target.result;
-    photoPreviewImg.src = currentPhotoBase64;
-    photoPreviewContainer.classList.remove("hidden");
-  };
-  reader.readAsDataURL(file);
-}
-
-inputPhoto.addEventListener("change", (e) => handleImageFile(e.target.files[0]));
-inputCameraCapture.addEventListener("change", (e) => handleImageFile(e.target.files[0]));
-removePhotoBtn.addEventListener("click", () => {
-  currentPhotoBase64 = null;
-  photoPreviewContainer.classList.add("hidden");
-});
-
-// PDF file reader
-inputPdf.addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  if (file.size > 1024 * 1024) {
-    alert("PDF size exceeds 1MB limit. Please compress file.");
-    inputPdf.value = "";
-    return;
-  }
-  currentPdfFileName = file.name;
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    currentPdfBase64 = ev.target.result;
-    pdfFileName.textContent = file.name;
-    pdfPreviewContainer.classList.remove("hidden");
-  };
-  reader.readAsDataURL(file);
-});
-removePdfBtn.addEventListener("click", () => {
-  currentPdfBase64 = null;
-  currentPdfFileName = null;
-  pdfPreviewContainer.classList.add("hidden");
-  inputPdf.value = "";
-});
-
-// Desktop Live Webcam
-async function openWebcam() {
-  try {
-    videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
-    cameraVideo.srcObject = videoStream;
-    liveCameraModal.classList.remove("hidden");
-  } catch (err) {
-    inputCameraCapture.click();
-  }
-}
-
-function stopWebcam() {
-  if (videoStream) {
-    videoStream.getTracks().forEach((track) => track.stop());
-    videoStream = null;
-  }
-  liveCameraModal.classList.add("hidden");
-}
-
-btnCaptureShutter.addEventListener("click", () => {
-  cameraCanvas.width = cameraVideo.videoWidth;
-  cameraCanvas.height = cameraVideo.videoHeight;
-  const ctx = cameraCanvas.getContext("2d");
-  ctx.drawImage(cameraVideo, 0, 0);
-  currentPhotoBase64 = cameraCanvas.toDataURL("image/jpeg", 0.85);
-  photoPreviewImg.src = currentPhotoBase64;
-  photoPreviewContainer.classList.remove("hidden");
-  stopWebcam();
-});
-
-btnCancelCamera.addEventListener("click", stopWebcam);
-closeLiveCameraBtn.addEventListener("click", stopWebcam);
-
-// ================= DOSSIER DETAIL MODAL =================
-window.openAssetDetailModal = function (id) {
-  const item = inventory.find((i) => i.id === id);
-  if (!item) return;
-
-  detailTypeBadge.textContent = item.type;
-  detailTypeBadge.className = `badge ${item.type === "Machine" ? "badge-machine" : "badge-part"}`;
-  detailAssetName.textContent = item.name;
-  detailBiomedTag.textContent = item.biomedTag || "—";
-  detailIdentifier.textContent = item.identifier || "—";
-  detailLocation.textContent = item.location || "—";
-  detailSubmittedBy.textContent = item.submittedBy || "Unknown Staff";
-  detailNotes.textContent = item.notes || "No technical remarks logged.";
-
-  detailStatusContainer.innerHTML = `<span class="badge ${
-    item.status === "Approved"
-      ? "badge-approved"
-      : item.status === "Needs Clarification"
-      ? "badge-clarify"
-      : "badge-pending"
-  }">${item.status}</span>`;
-
-  // Photo
-  if (item.photoData) {
-    detailPhotoContainer.innerHTML = `
-      <img src="${item.photoData}" style="max-height:220px; border-radius:6px; cursor:zoom-in; border:1px solid #cbd5e1;" 
-           onclick="openLightbox('${item.photoData}', '${item.name}')" />
-    `;
-  } else {
-    detailPhotoContainer.innerHTML = `<p style="color:var(--text-muted); font-size:0.85rem;">No photo uploaded.</p>`;
-  }
-
-  // PDF
-  if (item.pdfData) {
-    detailPdfCard.classList.remove("hidden");
-    detailPdfContainer.innerHTML = `
-      <a href="${item.pdfData}" download="${item.pdfName || "Report.pdf"}" class="btn btn-outline btn-sm">
-        📑 Open / Download ${item.pdfName || "Calibration Report"}
-      </a>
-    `;
-  } else {
-    detailPdfCard.classList.add("hidden");
-  }
-
-  assetDetailModal.classList.remove("hidden");
-};
-
-closeDetailModalBtn.addEventListener("click", () => assetDetailModal.classList.add("hidden"));
-closeDetailModalBottomBtn.addEventListener("click", () => assetDetailModal.classList.add("hidden"));
-
-// Lightbox
-window.openLightbox = function (src, title) {
-  imageViewerImg.src = src;
-  document.getElementById("imageViewerTitle").textContent = title;
-  imageViewerModal.classList.remove("hidden");
-};
-closeImageViewerBtn.addEventListener("click", () => imageViewerModal.classList.add("hidden"));
-
-// ================= SUPERVISOR ACTIONS =================
-window.approveItem = async function (id) {
-  if (confirm("Approve this asset for clinical service?")) {
-    await updateDoc(doc(db, "inventory", id), {
-      status: "Approved",
-      approvedBy: currentUser.name,
-      approvedAt: serverTimestamp()
-    });
-  }
-};
-
-window.openClarifyModal = function (id) {
-  activeClarifyItemId = id;
-  clarifyNoteInput.value = "";
-  clarifyModal.classList.remove("hidden");
-};
-
-submitClarifyBtn.addEventListener("click", async () => {
-  if (!activeClarifyItemId) return;
-  const note = clarifyNoteInput.value.trim();
-  if (!note) return alert("Please specify the clarification request.");
-
-  const item = inventory.find((i) => i.id === activeClarifyItemId);
-  const updatedNotes = item.notes ? `${item.notes}\n[Supervisor Request]: ${note}` : `[Supervisor Request]: ${note}`;
-
-  await updateDoc(doc(db, "inventory", activeClarifyItemId), {
-    status: "Needs Clarification",
-    notes: updatedNotes
-  });
-
-  clarifyModal.classList.add("hidden");
-  activeClarifyItemId = null;
-});
-
-cancelClarifyBtn.addEventListener("click", () => clarifyModal.classList.add("hidden"));
-closeClarifyModalBtn.addEventListener("click", () => clarifyModal.classList.add("hidden"));
-
-// ================= EQUIPMENT INVENTORY TOGGLE & SCROLL =================
-const eqToggleHeader = document.getElementById("eqToggleHeader");
-const eqDropdownList = document.getElementById("eqDropdownList");
-const eqArrowIcon = document.getElementById("eqArrowIcon");
-
-if (eqToggleHeader && eqDropdownList) {
-  eqToggleHeader.addEventListener("click", () => {
-    eqDropdownList.classList.toggle("hidden");
-    if (eqArrowIcon) {
-      eqArrowIcon.textContent = eqDropdownList.classList.contains("hidden") ? "►" : "▼";
-    }
-  });
-}
-
-document.querySelectorAll(".eq-pill-btn").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".eq-pill-btn").forEach((b) => b.classList.remove("active"));
-    btn.classList.add("active");
-
-    const targetType = btn.getAttribute("data-filter-type");
-    if (targetType === "ALL") {
-      searchInput.value = "";
-      renderTable();
-    } else {
-      searchInput.placeholder = `Filtering by ${btn.textContent.trim()}...`;
-      searchInput.focus();
-    }
-  });
-});
-
-// ==========================================================================
-// ================= SAFE SIDEBAR CONTROLS =================
-const navDashboard = document.getElementById("navDashboard");
-const navInventory = document.getElementById("navInventory");
-const navSpareParts = document.getElementById("navSpareParts");
-
-const viewDashboard = document.getElementById("viewDashboard");
-const viewInventory = document.getElementById("viewInventory");
-const pageTitleDisplay = document.getElementById("pageTitleDisplay");
-
+// ================= SIDEBAR NAVIGATION SWITCHER =================
 function setActiveView(activeNavBtn, targetView, titleText) {
   document.querySelectorAll(".sidebar-nav-btn").forEach(btn => btn.classList.remove("active"));
   if (activeNavBtn) activeNavBtn.classList.add("active");
@@ -883,72 +508,513 @@ if (navDashboard && viewDashboard) {
 if (navInventory && viewInventory) {
   navInventory.addEventListener("click", () => {
     setActiveView(navInventory, viewInventory, "Equipment Inventory Directory");
-    if (typeof renderEquipmentTable === "function") {
-      renderEquipmentTable();
-    }
+    renderEquipmentTable();
   });
 }
 
-// Event Listener: Click Spare Parts (Navigates to Dashboard & auto-filters to parts)
 if (navSpareParts) {
   navSpareParts.addEventListener("click", () => {
     setActiveView(navSpareParts, viewDashboard, "Spare Parts Registry");
-    const statusSelect = document.getElementById("statusFilter");
-    if (statusSelect) {
-      searchInput.value = "Part";
-      renderTable();
+    if (searchInput) {
+      searchInput.value = "";
     }
+    setTypeFilterTab("Part");
   });
 }
 
-// Quick filter clicks for Equipment Inventory Pills
+// ================= EQUIPMENT INVENTORY SEARCH & FILTER LOGIC =================
+// Pill button filtering
 document.querySelectorAll("#viewInventory .eq-pill-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
-    document.querySelectorAll("#viewInventory .eq-pill-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll("#viewInventory .eq-pill-btn").forEach((b) => b.classList.remove("active"));
     btn.classList.add("active");
 
-    const targetType = btn.getAttribute("data-filter-type");
-    const eqSearch = document.getElementById("eqSearchInput");
-    if (eqSearch) {
-      if (targetType === "ALL") {
-        eqSearch.value = "";
+    currentEqFilterType = btn.getAttribute("data-filter-type");
+
+    if (eqSearchInput) {
+      if (currentEqFilterType === "ALL") {
+        eqSearchInput.placeholder = "🔍 Search equipment directory by tag, serial, or room...";
       } else {
-        eqSearch.placeholder = `Filtering directory by ${btn.textContent.trim()}...`;
-        eqSearch.focus();
+        eqSearchInput.placeholder = `🔍 Searching specifically by ${btn.textContent.trim()}...`;
       }
+      eqSearchInput.focus();
     }
+    renderEquipmentTable();
   });
 });
 
-// Function to populate the Equipment Inventory Table
+if (eqSearchInput) {
+  eqSearchInput.addEventListener("input", () => {
+    renderEquipmentTable();
+  });
+}
+
+if (eqAreaFilter) {
+  eqAreaFilter.addEventListener("change", () => {
+    renderEquipmentTable();
+  });
+}
+
+// Render dedicated Equipment Inventory Table
 function renderEquipmentTable() {
   const tbody = document.getElementById("equipmentTableBody");
   if (!tbody) return;
 
-  // Filter only machine/equipment assets from your inventory list
-  const equipmentItems = inventoryData.filter(item => item.type === "MACHINE" || !item.type);
+  const query = eqSearchInput ? eqSearchInput.value.toLowerCase().trim() : "";
+  const selectedArea = eqAreaFilter ? eqAreaFilter.value : "ALL";
 
-  if (equipmentItems.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="9" class="empty-state">No equipment records found.</td></tr>`;
+  // Filter machines from the database inventory array
+  const filteredMachines = inventory.filter((item) => {
+    const isMachine = item.type === "Machine" || item.type === "MACHINE" || !item.type;
+    if (!isMachine) return false;
+
+    // Filter by Area dropdown if selected
+    if (selectedArea !== "ALL") {
+      const locStr = (item.location || "").toLowerCase();
+      if (!locStr.includes(selectedArea.toLowerCase())) return false;
+    }
+
+    if (!query) return true;
+
+    // Filter by selected category pill
+    if (currentEqFilterType === "biomedTag") {
+      return (item.biomedTag || "").toLowerCase().includes(query);
+    } else if (currentEqFilterType === "serialNumber") {
+      return (item.identifier || item.serialNumber || "").toLowerCase().includes(query);
+    } else if (currentEqFilterType === "pcNumber") {
+      return (item.pcNumber || "").toLowerCase().includes(query);
+    } else if (currentEqFilterType === "equipment") {
+      return (item.name || "").toLowerCase().includes(query);
+    } else if (currentEqFilterType === "grouping") {
+      return (item.grouping || "").toLowerCase().includes(query);
+    } else if (currentEqFilterType === "location") {
+      return (item.location || "").toLowerCase().includes(query);
+    } else if (currentEqFilterType === "ipmSchedule") {
+      return (item.ipmSchedule || "").toLowerCase().includes(query);
+    }
+
+    // Default "ALL" search
+    return (
+      (item.biomedTag && item.biomedTag.toLowerCase().includes(query)) ||
+      (item.name && item.name.toLowerCase().includes(query)) ||
+      (item.identifier && item.identifier.toLowerCase().includes(query)) ||
+      (item.pcNumber && item.pcNumber.toLowerCase().includes(query)) ||
+      (item.grouping && item.grouping.toLowerCase().includes(query)) ||
+      (item.location && item.location.toLowerCase().includes(query))
+    );
+  });
+
+  if (filteredMachines.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="9" class="empty-state">No equipment matching "${query}" found.</td></tr>`;
     return;
   }
 
-  tbody.innerHTML = equipmentItems.map(item => `
-    <tr>
-      <td><span class="badge-biomed-tag" onclick="openDetailModal('${item.id}')">${item.tag || item.biomedTag || 'N/A'}</span></td>
-      <td><strong>${item.name || item.equipment || 'Unnamed Equipment'}</strong></td>
-      <td>${item.serialNumber || item.sn || '-'}</td>
-      <td>${item.pcNumber || '-'}</td>
-      <td><span class="badge badge-machine">${item.grouping || item.group || 'General'}</span></td>
-      <td>${item.location || item.area || '-'}</td>
-      <td>${item.ipmSchedule || 'Quarterly'}</td>
-      <td><span class="badge ${item.status === 'APPROVED' ? 'badge-approved' : 'badge-pending'}">${item.status || 'Active'}</span></td>
-      <td>
-        <button class="btn btn-outline btn-sm" onclick="openDetailModal('${item.id}')">Dossier</button>
-      </td>
-    </tr>
-  `).join("");
+  tbody.innerHTML = filteredMachines.map((item) => {
+    const statusClass =
+      item.status === "Approved"
+        ? "badge-approved"
+        : item.status === "Needs Clarification"
+        ? "badge-clarify"
+        : "badge-pending";
+
+    return `
+      <tr>
+        <td>
+          <span class="badge-biomed-tag" onclick="openAssetDetailModal('${item.id}')">
+            🏷️ ${item.biomedTag || "NO TAG"}
+          </span>
+        </td>
+        <td><strong>${item.name || "Unnamed Device"}</strong></td>
+        <td><code>${item.identifier || "—"}</code></td>
+        <td>${item.pcNumber || "—"}</td>
+        <td><span class="badge badge-machine">${item.grouping || "General"}</span></td>
+        <td>${item.location || "—"}</td>
+        <td>${item.ipmSchedule || "Quarterly"}</td>
+        <td><span class="badge ${statusClass}">${item.status || "Pending"}</span></td>
+        <td>
+          <button type="button" class="btn btn-outline btn-sm" onclick="openAssetDetailModal('${item.id}')">Dossier</button>
+        </td>
+      </tr>
+    `;
+  }).join("");
 }
+
+// ================= MODAL: REGISTER MACHINE / PART =================
+function openMachineModal() {
+  if (!itemForm) return;
+  itemForm.reset();
+  editItemId.value = "";
+  formItemType.value = "Machine";
+  modalTitle.textContent = "Register Medical Equipment";
+
+  if (machineFormFields) machineFormFields.classList.remove("hidden");
+  if (partFormFields) partFormFields.classList.add("hidden");
+  if (pdfUploadGroup) pdfUploadGroup.classList.remove("hidden");
+
+  const today = new Date();
+  const formattedDate = today.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "2-digit" });
+  if (displayAcceptanceDate) displayAcceptanceDate.textContent = formattedDate;
+  if (inputAcceptanceDate) inputAcceptanceDate.value = formattedDate;
+
+  if (inputUserBadge) inputUserBadge.value = currentUser ? currentUser.badge : "";
+
+  clearAttachmentPreviews();
+  if (itemModal) itemModal.classList.remove("hidden");
+}
+
+if (btnAddMachine) btnAddMachine.addEventListener("click", openMachineModal);
+if (btnQuickAddEquipment) btnQuickAddEquipment.addEventListener("click", openMachineModal);
+
+if (btnAddPart) {
+  btnAddPart.addEventListener("click", () => {
+    if (!itemForm) return;
+    itemForm.reset();
+    editItemId.value = "";
+    formItemType.value = "Part";
+    modalTitle.textContent = "Register Spare Part / Consumable";
+
+    if (machineFormFields) machineFormFields.classList.add("hidden");
+    if (partFormFields) partFormFields.classList.remove("hidden");
+    if (pdfUploadGroup) pdfUploadGroup.classList.add("hidden");
+
+    clearAttachmentPreviews();
+    if (itemModal) itemModal.classList.remove("hidden");
+  });
+}
+
+if (closeItemModalBtn) closeItemModalBtn.addEventListener("click", () => itemModal.classList.add("hidden"));
+if (cancelItemModalBtn) cancelItemModalBtn.addEventListener("click", () => itemModal.classList.add("hidden"));
+
+// Form Submit Handler
+if (itemForm) {
+  itemForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const type = formItemType.value;
+    const isEditing = !!editItemId.value;
+
+    let payload = {
+      type,
+      updatedAt: serverTimestamp()
+    };
+
+    if (type === "Machine") {
+      const loc = selectLocation.value && selectSubLocation.value 
+        ? `${selectLocation.value} - ${selectSubLocation.value}` 
+        : selectLocation.value || "";
+
+      payload = {
+        ...payload,
+        biomedTag: inputBiomedTag.value.trim().toUpperCase(),
+        acceptanceDate: inputAcceptanceDate.value,
+        userBadge: inputUserBadge.value.trim(),
+        grouping: selectGrouping.value,
+        name: inputName.value,
+        modelName: inputModelName.value.trim(),
+        manufacturer: inputManufacturer.value,
+        identifier: inputIdentifier.value.trim(),
+        location: loc,
+        notes: inputRemarks.value.trim(),
+        photoData: currentPhotoBase64,
+        pdfData: currentPdfBase64,
+        pdfName: currentPdfFileName
+      };
+    } else {
+      payload = {
+        ...payload,
+        biomedTag: inputPartTag.value.trim().toUpperCase(),
+        name: inputPartName.value.trim(),
+        identifier: inputPartCompat.value.trim(),
+        location: inputPartLocation.value.trim(),
+        quantity: parseInt(inputQuantity.value, 10) || 1,
+        notes: inputRemarks.value.trim(),
+        photoData: currentPhotoBase64,
+        pdfData: null,
+        pdfName: null
+      };
+    }
+
+    if (!isEditing) {
+      payload.createdAt = serverTimestamp();
+      payload.submittedBy = currentUser ? currentUser.name : "Staff";
+      payload.status = "Pending";
+      await setDoc(doc(collection(db, "inventory")), payload);
+    } else {
+      await updateDoc(doc(db, "inventory", editItemId.value), payload);
+    }
+
+    itemModal.classList.add("hidden");
+  });
+}
+
+// Edit Existing Item
+window.editItem = function (id) {
+  const item = inventory.find((i) => i.id === id);
+  if (!item || !itemForm) return;
+
+  itemForm.reset();
+  editItemId.value = item.id;
+  formItemType.value = item.type;
+  modalTitle.textContent = `Edit ${item.type}: ${item.biomedTag}`;
+
+  if (item.type === "Machine") {
+    if (machineFormFields) machineFormFields.classList.remove("hidden");
+    if (partFormFields) partFormFields.classList.add("hidden");
+    if (pdfUploadGroup) pdfUploadGroup.classList.remove("hidden");
+
+    if (displayAcceptanceDate) displayAcceptanceDate.textContent = item.acceptanceDate || "N/A";
+    if (inputAcceptanceDate) inputAcceptanceDate.value = item.acceptanceDate || "";
+    if (inputBiomedTag) inputBiomedTag.value = item.biomedTag || "";
+    if (inputUserBadge) inputUserBadge.value = item.userBadge || "";
+    if (selectGrouping) selectGrouping.value = item.grouping || "";
+    if (inputName) inputName.value = item.name || "";
+    if (inputModelName) inputModelName.value = item.modelName || "";
+    if (inputManufacturer) inputManufacturer.value = item.manufacturer || "";
+    if (inputIdentifier) inputIdentifier.value = item.identifier || "";
+  } else {
+    if (machineFormFields) machineFormFields.classList.add("hidden");
+    if (partFormFields) partFormFields.classList.remove("hidden");
+    if (pdfUploadGroup) pdfUploadGroup.classList.add("hidden");
+
+    if (inputPartTag) inputPartTag.value = item.biomedTag || "";
+    if (inputPartName) inputPartName.value = item.name || "";
+    if (inputPartCompat) inputPartCompat.value = item.identifier || "";
+    if (inputPartLocation) inputPartLocation.value = item.location || "";
+    if (inputQuantity) inputQuantity.value = item.quantity || 1;
+  }
+
+  if (inputRemarks) inputRemarks.value = item.notes || "";
+
+  currentPhotoBase64 = item.photoData || null;
+  if (currentPhotoBase64 && photoPreviewImg && photoPreviewContainer) {
+    photoPreviewImg.src = currentPhotoBase64;
+    photoPreviewContainer.classList.remove("hidden");
+  } else if (photoPreviewContainer) {
+    photoPreviewContainer.classList.add("hidden");
+  }
+
+  currentPdfBase64 = item.pdfData || null;
+  currentPdfFileName = item.pdfName || null;
+  if (currentPdfBase64 && pdfFileName && pdfPreviewContainer) {
+    pdfFileName.textContent = currentPdfFileName || "Attached Document.pdf";
+    pdfPreviewContainer.classList.remove("hidden");
+  } else if (pdfPreviewContainer) {
+    pdfPreviewContainer.classList.add("hidden");
+  }
+
+  if (itemModal) itemModal.classList.remove("hidden");
+};
+
+// ================= ATTACHMENTS (PHOTO & PDF) =================
+function clearAttachmentPreviews() {
+  currentPhotoBase64 = null;
+  currentPdfBase64 = null;
+  currentPdfFileName = null;
+  if (photoPreviewContainer) photoPreviewContainer.classList.add("hidden");
+  if (pdfPreviewContainer) pdfPreviewContainer.classList.add("hidden");
+  if (inputPhoto) inputPhoto.value = "";
+  if (inputCameraCapture) inputCameraCapture.value = "";
+  if (inputPdf) inputPdf.value = "";
+}
+
+if (btnTriggerGallery) btnTriggerGallery.addEventListener("click", () => inputPhoto.click());
+if (btnTriggerCamera) {
+  btnTriggerCamera.addEventListener("click", () => {
+    if (/Android|iPhone|iPad/i.test(navigator.userAgent)) {
+      if (inputCameraCapture) inputCameraCapture.click();
+    } else {
+      openWebcam();
+    }
+  });
+}
+
+function handleImageFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    currentPhotoBase64 = e.target.result;
+    if (photoPreviewImg) photoPreviewImg.src = currentPhotoBase64;
+    if (photoPreviewContainer) photoPreviewContainer.classList.remove("hidden");
+  };
+  reader.readAsDataURL(file);
+}
+
+if (inputPhoto) inputPhoto.addEventListener("change", (e) => handleImageFile(e.target.files[0]));
+if (inputCameraCapture) inputCameraCapture.addEventListener("change", (e) => handleImageFile(e.target.files[0]));
+if (removePhotoBtn) {
+  removePhotoBtn.addEventListener("click", () => {
+    currentPhotoBase64 = null;
+    if (photoPreviewContainer) photoPreviewContainer.classList.add("hidden");
+  });
+}
+
+if (inputPdf) {
+  inputPdf.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 1024 * 1024) {
+      alert("PDF size exceeds 1MB limit. Please compress file.");
+      inputPdf.value = "";
+      return;
+    }
+    currentPdfFileName = file.name;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      currentPdfBase64 = ev.target.result;
+      if (pdfFileName) pdfFileName.textContent = file.name;
+      if (pdfPreviewContainer) pdfPreviewContainer.classList.remove("hidden");
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+if (removePdfBtn) {
+  removePdfBtn.addEventListener("click", () => {
+    currentPdfBase64 = null;
+    currentPdfFileName = null;
+    if (pdfPreviewContainer) pdfPreviewContainer.classList.add("hidden");
+    if (inputPdf) inputPdf.value = "";
+  });
+}
+
+// Desktop Live Webcam
+async function openWebcam() {
+  try {
+    videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
+    if (cameraVideo) cameraVideo.srcObject = videoStream;
+    if (liveCameraModal) liveCameraModal.classList.remove("hidden");
+  } catch (err) {
+    if (inputCameraCapture) inputCameraCapture.click();
+  }
+}
+
+function stopWebcam() {
+  if (videoStream) {
+    videoStream.getTracks().forEach((track) => track.stop());
+    videoStream = null;
+  }
+  if (liveCameraModal) liveCameraModal.classList.add("hidden");
+}
+
+if (btnCaptureShutter) {
+  btnCaptureShutter.addEventListener("click", () => {
+    if (!cameraVideo || !cameraCanvas) return;
+    cameraCanvas.width = cameraVideo.videoWidth;
+    cameraCanvas.height = cameraVideo.videoHeight;
+    const ctx = cameraCanvas.getContext("2d");
+    ctx.drawImage(cameraVideo, 0, 0);
+    currentPhotoBase64 = cameraCanvas.toDataURL("image/jpeg", 0.85);
+    if (photoPreviewImg) photoPreviewImg.src = currentPhotoBase64;
+    if (photoPreviewContainer) photoPreviewContainer.classList.remove("hidden");
+    stopWebcam();
+  });
+}
+
+if (btnCancelCamera) btnCancelCamera.addEventListener("click", stopWebcam);
+if (closeLiveCameraBtn) closeLiveCameraBtn.addEventListener("click", stopWebcam);
+
+// ================= DOSSIER DETAIL MODAL =================
+window.openAssetDetailModal = function (id) {
+  const item = inventory.find((i) => i.id === id);
+  if (!item) return;
+
+  if (detailTypeBadge) {
+    detailTypeBadge.textContent = item.type;
+    detailTypeBadge.className = `badge ${item.type === "Machine" ? "badge-machine" : "badge-part"}`;
+  }
+  if (detailAssetName) detailAssetName.textContent = item.name;
+  if (detailBiomedTag) detailBiomedTag.textContent = item.biomedTag || "—";
+  if (detailIdentifier) detailIdentifier.textContent = item.identifier || "—";
+  if (detailLocation) detailLocation.textContent = item.location || "—";
+  if (detailSubmittedBy) detailSubmittedBy.textContent = item.submittedBy || "Unknown Staff";
+  if (detailNotes) detailNotes.textContent = item.notes || "No technical remarks logged.";
+
+  if (detailStatusContainer) {
+    detailStatusContainer.innerHTML = `<span class="badge ${
+      item.status === "Approved"
+        ? "badge-approved"
+        : item.status === "Needs Clarification"
+        ? "badge-clarify"
+        : "badge-pending"
+    }">${item.status}</span>`;
+  }
+
+  if (detailPhotoContainer) {
+    if (item.photoData) {
+      detailPhotoContainer.innerHTML = `
+        <img src="${item.photoData}" style="max-height:220px; border-radius:6px; cursor:zoom-in; border:1px solid #cbd5e1;" 
+             onclick="openLightbox('${item.photoData}', '${item.name}')" />
+      `;
+    } else {
+      detailPhotoContainer.innerHTML = `<p style="color:var(--text-muted); font-size:0.85rem;">No photo uploaded.</p>`;
+    }
+  }
+
+  if (detailPdfCard && detailPdfContainer) {
+    if (item.pdfData) {
+      detailPdfCard.classList.remove("hidden");
+      detailPdfContainer.innerHTML = `
+        <a href="${item.pdfData}" download="${item.pdfName || "Report.pdf"}" class="btn btn-outline btn-sm">
+          📑 Open / Download ${item.pdfName || "Calibration Report"}
+        </a>
+      `;
+    } else {
+      detailPdfCard.classList.add("hidden");
+    }
+  }
+
+  if (assetDetailModal) assetDetailModal.classList.remove("hidden");
+};
+
+if (closeDetailModalBtn) closeDetailModalBtn.addEventListener("click", () => assetDetailModal.classList.add("hidden"));
+if (closeDetailModalBottomBtn) closeDetailModalBottomBtn.addEventListener("click", () => assetDetailModal.classList.add("hidden"));
+
+// Lightbox
+window.openLightbox = function (src, title) {
+  if (imageViewerImg) imageViewerImg.src = src;
+  const titleEl = document.getElementById("imageViewerTitle");
+  if (titleEl) titleEl.textContent = title;
+  if (imageViewerModal) imageViewerModal.classList.remove("hidden");
+};
+if (closeImageViewerBtn) closeImageViewerBtn.addEventListener("click", () => imageViewerModal.classList.add("hidden"));
+
+// ================= SUPERVISOR ACTIONS =================
+window.approveItem = async function (id) {
+  if (confirm("Approve this asset for clinical service?")) {
+    await updateDoc(doc(db, "inventory", id), {
+      status: "Approved",
+      approvedBy: currentUser ? currentUser.name : "Supervisor",
+      approvedAt: serverTimestamp()
+    });
+  }
+};
+
+window.openClarifyModal = function (id) {
+  activeClarifyItemId = id;
+  if (clarifyNoteInput) clarifyNoteInput.value = "";
+  if (clarifyModal) clarifyModal.classList.remove("hidden");
+};
+
+if (submitClarifyBtn) {
+  submitClarifyBtn.addEventListener("click", async () => {
+    if (!activeClarifyItemId || !clarifyNoteInput) return;
+    const note = clarifyNoteInput.value.trim();
+    if (!note) return alert("Please specify the clarification request.");
+
+    const item = inventory.find((i) => i.id === activeClarifyItemId);
+    const updatedNotes = item.notes ? `${item.notes}\n[Supervisor Request]: ${note}` : `[Supervisor Request]: ${note}`;
+
+    await updateDoc(doc(db, "inventory", activeClarifyItemId), {
+      status: "Needs Clarification",
+      notes: updatedNotes
+    });
+
+    clarifyModal.classList.add("hidden");
+    activeClarifyItemId = null;
+  });
+}
+
+if (cancelClarifyBtn) cancelClarifyBtn.addEventListener("click", () => clarifyModal.classList.add("hidden"));
+if (closeClarifyModalBtn) closeClarifyModalBtn.addEventListener("click", () => clarifyModal.classList.add("hidden"));
 
 // ================= IT ADMIN: BACKUP & ACCOUNTS =================
 window.exportDatabaseBackup = function () {
@@ -962,14 +1028,15 @@ window.exportDatabaseBackup = function () {
 };
 
 window.openAccountsModal = async function () {
-  accountsModal.classList.remove("hidden");
+  if (accountsModal) accountsModal.classList.remove("hidden");
   loadAdminTables();
 };
 
-closeAccountsModalBtn.addEventListener("click", () => accountsModal.classList.add("hidden"));
-closeAccountsBtn.addEventListener("click", () => accountsModal.classList.add("hidden"));
+if (closeAccountsModalBtn) closeAccountsModalBtn.addEventListener("click", () => accountsModal.classList.add("hidden"));
+if (closeAccountsBtn) closeAccountsBtn.addEventListener("click", () => accountsModal.classList.add("hidden"));
 
 async function loadAdminTables() {
+  if (!invitesTableBody || !accountsTableBody) return;
   // Invites
   const invSnap = await getDocs(collection(db, "invitations"));
   invitesTableBody.innerHTML = "";
@@ -1005,8 +1072,12 @@ async function loadAdminTables() {
 }
 
 window.handleGenerateInvite = async function () {
-  const badge = document.getElementById("genBadge").value.trim().toUpperCase();
-  const role = document.getElementById("genRole").value;
+  const badgeInput = document.getElementById("genBadge");
+  const roleInput = document.getElementById("genRole");
+  if (!badgeInput || !roleInput) return;
+
+  const badge = badgeInput.value.trim().toUpperCase();
+  const role = roleInput.value;
   const passcode = "BIO-" + Math.floor(1000 + Math.random() * 9000);
 
   await setDoc(doc(db, "invitations", passcode), {
@@ -1017,8 +1088,10 @@ window.handleGenerateInvite = async function () {
   });
 
   const resDiv = document.getElementById("latestInviteResult");
-  resDiv.innerHTML = `Generated Passcode: <strong>${passcode}</strong> for Badge: <strong>${badge || "Any"}</strong> (${role})`;
-  resDiv.classList.remove("hidden");
+  if (resDiv) {
+    resDiv.innerHTML = `Generated Passcode: <strong>${passcode}</strong> for Badge: <strong>${badge || "Any"}</strong> (${role})`;
+    resDiv.classList.remove("hidden");
+  }
   loadAdminTables();
 };
 
@@ -1028,20 +1101,3 @@ window.deleteUserAccount = async function (uid) {
     loadAdminTables();
   }
 };
-// Equipment Inventory Quick Filter Handling
-document.querySelectorAll(".eq-pill-btn").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".eq-pill-btn").forEach((b) => b.classList.remove("active"));
-    btn.classList.add("active");
-
-    const targetType = btn.getAttribute("data-filter-type");
-    if (targetType === "ALL") {
-      searchInput.value = "";
-      renderTable();
-    } else {
-      // Focus search input and label prompt for selected column
-      searchInput.placeholder = `Filtering by ${btn.textContent.trim()}...`;
-      searchInput.focus();
-    }
-  });
-});
