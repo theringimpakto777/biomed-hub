@@ -839,8 +839,7 @@ document.querySelectorAll(".eq-pill-btn").forEach((btn) => {
 });
 
 // ==========================================================================
-// SIDEBAR NAVIGATION & VIEW SWITCHER (OPTION 1)
-// ==========================================================================
+// ================= SAFE SIDEBAR CONTROLS =================
 const navDashboard = document.getElementById("navDashboard");
 const navInventory = document.getElementById("navInventory");
 const navSpareParts = document.getElementById("navSpareParts");
@@ -849,37 +848,29 @@ const viewDashboard = document.getElementById("viewDashboard");
 const viewInventory = document.getElementById("viewInventory");
 const pageTitleDisplay = document.getElementById("pageTitleDisplay");
 
-// Helper function to switch active tab styling and toggle views
 function setActiveView(activeNavBtn, targetView, titleText) {
-  // 1. Reset all sidebar buttons to inactive
   document.querySelectorAll(".sidebar-nav-btn").forEach(btn => btn.classList.remove("active"));
-  
-  // 2. Set chosen sidebar button as active
   if (activeNavBtn) activeNavBtn.classList.add("active");
 
-  // 3. Hide all views
   if (viewDashboard) viewDashboard.classList.add("hidden");
   if (viewInventory) viewInventory.classList.add("hidden");
 
-  // 4. Show the selected view
   if (targetView) targetView.classList.remove("hidden");
-
-  // 5. Update top header title
   if (pageTitleDisplay) pageTitleDisplay.textContent = titleText;
 }
 
-// Event Listener: Click Dashboard
-if (navDashboard) {
+if (navDashboard && viewDashboard) {
   navDashboard.addEventListener("click", () => {
     setActiveView(navDashboard, viewDashboard, "Dashboard Overview");
   });
 }
 
-// Event Listener: Click Equipment Inventory
-if (navInventory) {
+if (navInventory && viewInventory) {
   navInventory.addEventListener("click", () => {
     setActiveView(navInventory, viewInventory, "Equipment Inventory Directory");
-    renderEquipmentTable(); // Render equipment table when opening this view
+    if (typeof renderEquipmentTable === "function") {
+      renderEquipmentTable();
+    }
   });
 }
 
