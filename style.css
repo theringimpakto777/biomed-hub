@@ -596,16 +596,35 @@ body {
   max-width: 290px;
 }
 
-/* Header as Clickable Toggle */
+/* ================= EQUIPMENT INVENTORY (FULL-WIDTH DROPDOWN) ================= */
+.eq-inventory-container {
+  background: #ffffff;
+  border: 1px solid #dcfce7;
+  border-radius: 8px;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .eq-inventory-header {
   background: #eaf8ee;
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 1.25rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
   user-select: none;
-  border-radius: 8px 8px 0 0;
+  border-radius: 8px;
+  transition: background 0.15s ease-in-out;
+}
+
+.eq-inventory-header:hover {
+  background: #dcfce7;
+}
+
+.eq-header-icon {
+  font-size: 1.1rem;
 }
 
 .eq-inventory-header h3 {
@@ -614,64 +633,28 @@ body {
   color: #166534;
   margin: 0;
   flex: 1;
-  margin-left: 0.5rem;
+  margin-left: 0.6rem;
 }
 
 .eq-arrow {
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   color: #166534;
-  transition: transform 0.2s ease;
 }
 
-/* Scrollable List Body */
 .eq-inventory-body {
-  padding: 0.6rem 0.75rem;
+  padding: 0.85rem 1.25rem;
   border-top: 1px solid #d1fae5;
 }
 
 .eq-pill-grid {
   display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-  max-height: 190px;        /* Limits visible height so it scrolls */
-  overflow-y: auto;         /* Vertical scrollbar */
-  padding-right: 0.3rem;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  max-height: 160px;
+  overflow-y: auto;
+  padding-right: 0.4rem;
 }
 
-/* Scrollbar styling */
-.eq-pill-grid::-webkit-scrollbar {
-  width: 5px;
-}
-.eq-pill-grid::-webkit-scrollbar-thumb {
-  background: #86efac;
-  border-radius: 4px;
-}
-
-/* Button Pills */
-.eq-pill-btn {
-  background: #eaf8ee;
-  color: #166534;
-  border: 1px solid #bbf7d0;
-  border-radius: 6px;
-  padding: 0.45rem 0.75rem;
-  font-size: 0.82rem;
-  font-weight: 500;
-  text-align: left;
-  cursor: pointer;
-}
-
-.eq-pill-btn:hover {
-  background: #dcfce7;
-}
-
-.eq-pill-btn.active {
-  background: #16a34a;
-  color: #ffffff;
-  border-color: #15803d;
-  font-weight: 600;
-}
-
-/* Custom Scrollbar Styling (Matches the green theme) */
 .eq-pill-grid::-webkit-scrollbar {
   width: 6px;
 }
@@ -688,4 +671,28 @@ body {
 
 .eq-pill-grid::-webkit-scrollbar-thumb:hover {
   background: #86efac;
+}
+
+.eq-pill-btn {
+  background: #eaf8ee;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease-in-out;
+}
+
+.eq-pill-btn:hover {
+  background: #dcfce7;
+}
+
+.eq-pill-btn.active {
+  background: #16a34a;
+  color: #ffffff;
+  border-color: #15803d;
+  font-weight: 600;
 }
