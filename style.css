@@ -637,33 +637,20 @@ body {
 }
 
 .eq-pill-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  max-height: 160px;
-  overflow-y: auto;
-  padding-right: 0.4rem;
-}
-
-.eq-pill-grid::-webkit-scrollbar {
-  width: 6px;
-}
-
-.eq-pill-grid::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 4px;
-}
-
-.eq-pill-grid::-webkit-scrollbar-thumb {
-  background: #bbf7d0;
-  border-radius: 4px;
-}
-
-.eq-pill-grid::-webkit-scrollbar-thumb:hover {
-  background: #86efac;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  gap: 0.6rem !important;
+  max-width: 100% !important;
+  max-height: none !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding-bottom: 0.5rem;
 }
 
 .eq-pill-btn {
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
   background: #eaf8ee;
   color: #166534;
   border: 1px solid #bbf7d0;
@@ -672,7 +659,6 @@ body {
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
-  white-space: nowrap;
   transition: all 0.15s ease-in-out;
 }
 
