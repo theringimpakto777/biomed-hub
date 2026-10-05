@@ -464,44 +464,49 @@ searchInput.addEventListener("input", renderTable);
 statusFilter.addEventListener("change", renderTable);
 
 // ================= MODAL: REGISTER MACHINE / PART =================
-btnAddMachine.addEventListener("click", () => {
-  itemForm.reset();
-  editItemId.value = "";
-  formItemType.value = "Machine";
-  modalTitle.textContent = "Register Medical Equipment";
+if (btnAddMachine) {
+  btnAddMachine.addEventListener("click", () => {
+    itemForm.reset();
+    editItemId.value = "";
+    formItemType.value = "Machine";
+    modalTitle.textContent = "Register Medical Equipment";
 
-  // Switch form layout
-  machineFormFields.classList.remove("hidden");
-  partFormFields.classList.add("hidden");
-  pdfUploadGroup.classList.remove("hidden");
+    // Switch form layout
+    machineFormFields.classList.remove("hidden");
+    partFormFields.classList.add("hidden");
+    pdfUploadGroup.classList.remove("hidden");
 
-  // Format Acceptance Date
-  const today = new Date();
-  const formattedDate = today.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "2-digit" });
-  displayAcceptanceDate.textContent = formattedDate;
-  inputAcceptanceDate.value = formattedDate;
+    // Format Acceptance Date
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "2-digit" });
+    displayAcceptanceDate.textContent = formattedDate;
+    inputAcceptanceDate.value = formattedDate;
 
-  // Pre-fill Badge
-  inputUserBadge.value = currentUser ? currentUser.badge : "";
+    // Pre-fill Badge
+    inputUserBadge.value = currentUser ? currentUser.badge : "";
 
-  clearAttachmentPreviews();
-  itemModal.classList.remove("hidden");
-});
+    clearAttachmentPreviews();
+    itemModal.classList.remove("hidden");
+  });
+}
 
-btnAddPart.addEventListener("click", () => {
-  itemForm.reset();
-  editItemId.value = "";
-  formItemType.value = "Part";
-  modalTitle.textContent = "Register Spare Part / Consumable";
+if (btnAddPart) {
+  btnAddPart.addEventListener("click", () => {
+    itemForm.reset();
+    editItemId.value = "";
+    formItemType.value = "Part";
+    modalTitle.textContent = "Register Spare Part / Consumable";
 
-  // Switch form layout
-  machineFormFields.classList.add("hidden");
-  partFormFields.classList.remove("hidden");
-  pdfUploadGroup.classList.add("hidden");
+    // Switch form layout
+    machineFormFields.classList.add("hidden");
+    partFormFields.classList.remove("hidden");
+    pdfUploadGroup.classList.add("hidden");
 
-  clearAttachmentPreviews();
-  itemModal.classList.remove("hidden");
-});
+    clearAttachmentPreviews();
+    itemModal.classList.remove("hidden");
+  });
+}
+
 
 closeItemModalBtn.addEventListener("click", () => itemModal.classList.add("hidden"));
 cancelItemModalBtn.addEventListener("click", () => itemModal.classList.add("hidden"));
