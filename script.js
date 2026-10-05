@@ -811,7 +811,7 @@ closeClarifyModalBtn.addEventListener("click", () => clarifyModal.classList.add(
 // ================= EQUIPMENT INVENTORY TOGGLE & SCROLL =================
 const eqToggleHeader = document.getElementById("eqToggleHeader");
 const eqDropdownList = document.getElementById("eqDropdownList");
-const eqArrowIcon: = document.getElementById("eqArrowIcon");
+const eqArrowIcon = document.getElementById("eqArrowIcon");
 
 if (eqToggleHeader && eqDropdownList) {
   eqToggleHeader.addEventListener("click", () => {
