@@ -73,122 +73,202 @@
     </div>
   </div>
 
-  <!-- ================= MAIN APPLICATION ================= -->
-  <div id="mainApp" class="app-layout hidden">
+ <!-- ================= MAIN APPLICATION LAYOUT (SIDEBAR + CONTENT) ================= -->
+<div id="appContainer" class="app-layout">
+
+  <!-- ================= 1. LEFT SIDEBAR NAVIGATION ================= -->
+  <aside class="app-sidebar">
+    <!-- Sidebar Brand / Logo Header -->
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">🏥</div>
+      <div>
+        <h2 class="sidebar-title">Biomed Hub</h2>
+        <span class="sidebar-subtitle">Clinical Asset Management</span>
+      </div>
+    </div>
+
+    <!-- Sidebar Navigation Links -->
+    <nav class="sidebar-nav">
+      <!-- Nav Button: Dashboard View -->
+      <button type="button" class="sidebar-nav-btn active" id="navDashboard">
+        <span class="nav-icon">📊</span>
+        <span>Dashboard</span>
+      </button>
+
+      <!-- Nav Button: Equipment Inventory View -->
+      <button type="button" class="sidebar-nav-btn" id="navInventory">
+        <span class="nav-icon">📑</span>
+        <span>Equipment Inventory</span>
+      </button>
+
+      <!-- Nav Button: Spare Parts View (Filter shortcut) -->
+      <button type="button" class="sidebar-nav-btn" id="navSpareParts">
+        <span class="nav-icon">⚙️</span>
+        <span>Spare Parts</span>
+      </button>
+    </nav>
+
+    <!-- Sidebar Footer / Version Info -->
+    <div class="sidebar-footer">
+      <span>Biomedical System v2.0</span>
+    </div>
+  </aside>
+  <!-- ================= END LEFT SIDEBAR ================= -->
+
+  <!-- ================= 2. MAIN CONTENT AREA (RIGHT PANE) ================= -->
+  <div class="app-main-content">
     
-    <!-- Top Header -->
+    <!-- Top Bar: User Profile and Sign Out -->
     <header class="app-header">
       <div class="header-brand">
-        <span class="brand-icon">🏥</span>
-        <div>
-          <h1>Biomedical Asset Registry</h1>
-          <p class="brand-sub">Clinical Engineering & Inventory System</p>
-        </div>
+        <h1 id="pageTitleDisplay">Dashboard Overview</h1>
       </div>
       <div class="header-user">
-        <div id="userBadge" class="user-chip">
-          <span>🧰</span>
-          <span>Loading Session...</span>
-        </div>
-        <button id="logoutBtn" class="btn btn-outline btn-sm">Sign Out</button>
+        <div class="user-chip" id="userDisplayName">👤 Emmanuel Domingo [25868]</div>
+        <button type="button" class="btn btn-outline btn-sm" id="btnSignOut">Sign Out</button>
       </div>
-     </header>
+    </header>
 
-    <!-- IT Admin Banner -->
+    <!-- IT Admin Banner (Keeps your admin functions intact) -->
     <div id="itAdminBanner" class="it-banner hidden">
       <div class="it-banner-content">
-        <span>💻 <strong>IT Administrative Console:</strong> Read-Only Mode & Access Control Active</span>
-        <div class="it-banner-actions">
-          <button class="btn btn-sm btn-it" onclick="openAccountsModal()">👥 Manage Accounts & Invites</button>
-          <button class="btn btn-sm btn-it-outline" onclick="exportDatabaseBackup()">⬇️ Export Cloud Backup (JSON)</button>
-        </div>
+        <span>🛡️ IT Administrator Mode Active</span>
+        <button type="button" class="btn btn-sm btn-it" id="btnBackupDb">Backup Firestore</button>
       </div>
     </div>
 
     <main class="app-main">
-      <!-- KPI Cards -->
-      <section class="kpi-grid">
-        <div class="kpi-card" id="cardMachines">
-          <div class="kpi-title">ACTIVE MACHINES</div>
-          <div class="kpi-value" id="kpiMachines">0</div>
-        </div>
-        <div class="kpi-card" id="cardParts">
-          <div class="kpi-title">SPARE PARTS</div>
-          <div class="kpi-value" id="kpiParts">0</div>
-        </div>
-        <div class="kpi-card" id="cardPending">
-          <div class="kpi-title">PENDING APPROVAL</div>
-          <div class="kpi-value" id="kpiPending">0</div>
-        </div>
-      </section>
+      <!-- ================= VIEW 1: DASHBOARD (Active by default) ================= -->
+      <div id="viewDashboard">
+        <!-- KPI Cards Grid -->
+        <section class="kpi-grid">
+          <div class="kpi-card">
+            <span class="kpi-title">ACTIVE MACHINES</span>
+            <div class="kpi-value" id="kpiActiveMachines">2</div>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-title">SPARE PARTS</span>
+            <div class="kpi-value" id="kpiSpareParts">1</div>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-title">PENDING APPROVAL</span>
+            <div class="kpi-value" id="kpiPendingApproval">1</div>
+          </div>
+        </section>
 
-<!-- ================= EQUIPMENT INVENTORY DROPDOWN ================= -->
-<section class="eq-inventory-container">
-  <div class="eq-inventory-header" id="eqToggleHeader">
-    <span class="eq-header-icon">📑</span>
-    <h3>Equipment Inventory</h3>
-    <span id="eqArrowIcon" class="eq-arrow">▼</span>
-  </div>
-  <div class="eq-inventory-body hidden" id="eqDropdownList">
-  <div class="eq-inventory-body" id="eqDropdownList">
-    <div class="eq-pill-grid">
-      <button type="button" class="eq-pill-btn active" data-filter-type="ALL">All Items</button>
-      <button type="button" class="eq-pill-btn" data-filter-type="biomedTag">Biomed Tag</button>
-      <button type="button" class="eq-pill-btn" data-filter-type="serialNumber">Serial Number</button>
-      <button type="button" class="eq-pill-btn" data-filter-type="pcNumber">PC Number</button>
-      <button type="button" class="eq-pill-btn" data-filter-type="equipment">Equipment</button>
-      <button type="button" class="eq-pill-btn" data-filter-type="grouping">Group of Equipment</button>
-      <button type="button" class="eq-pill-btn" data-filter-type="location">Area</button>
-      <button type="button" class="eq-pill-btn" data-filter-type="ipmSchedule">IPM Schedule</button>
-    </div>
-  </div>
-</section>
+        <!-- Main Dashboard Toolbar -->
+        <section class="toolbar">
+          <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search by tag, model, serial, or room..." />
+          </div>
+          <div class="filter-box">
+            <select id="statusFilter">
+              <option value="ALL">All Statuses</option>
+              <option value="ACTIVE">Active</option>
+              <option value="PENDING">Pending</option>
+            </select>
+          </div>
+          <div class="action-buttons">
+            <button type="button" class="btn btn-primary" id="btnRegisterMachine">➕ Register Machine</button>
+            <button type="button" class="btn btn-secondary" id="btnRegisterPart">🔩 Register Part</button>
+          </div>
+        </section>
 
-      <!-- Action Bar -->
-      <section class="toolbar">
-        <div class="search-box">
-          <input type="text" id="searchInput" placeholder="Search by tag, model, serial, or room..." />
-        </div>
-        <div class="filter-box">
-          <select id="statusFilter">
-            <option value="ALL">All Statuses</option>
-            <option value="Pending">Pending</option>
-            <option value="Approved">Approved</option>
-            <option value="Needs Clarification">Needs Clarification</option>
-          </select>
-        </div>
-        <div id="biomedActionButtons" class="action-buttons">
-          <button id="btnAddMachine" class="btn btn-primary">➕ Register Machine</button>
-          <button id="btnAddPart" class="btn btn-secondary">🔩 Register Part</button>
-        </div>
-      </section>
+        <!-- Main Dashboard Registry Table -->
+        <section class="table-container">
+          <table class="inventory-table">
+            <thead>
+              <tr>
+                <th>Part P/N / Asset Tag</th>
+                <th>Category</th>
+                <th>Description & Specs</th>
+                <th>Attachments</th>
+                <th>Compatible Model / SN</th>
+                <th>Location / Shelf Bin</th>
+                <th>Stock</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryTableBody">
+              <!-- Rendered dynamically by script.js -->
+            </tbody>
+          </table>
+        </section>
+      </div>
+      <!-- ================= END VIEW 1: DASHBOARD ================= -->
 
-      <!-- Inventory Table -->
-      <section class="table-container">
-        <table class="inventory-table">
-          <thead>
-            <tr>
-              <th style="width: 140px;">Part P/N / Asset Tag</th>
-              <th style="width: 90px;">Category</th>
-              <th>Description & Specs</th>
-              <th style="width: 100px;">Attachments</th>
-              <th>Compatible Model / SN</th>
-              <th>Location / Shelf Bin</th>
-              <th style="width: 80px; text-align: center;">Stock</th>
-              <th style="width: 120px;">Status</th>
-              <th class="actions-header" style="text-align: right;">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="inventoryTableBody">
-            <!-- Dynamically Rendered by script.js -->
-          </tbody>
-        </table>
-        <div id="emptyNotice" class="empty-state hidden">
-          <p>No inventory records found matching your filters.</p>
+      <!-- ================= VIEW 2: DEDICATED EQUIPMENT INVENTORY (Hidden by default) ================= -->
+      <div id="viewInventory" class="hidden">
+        
+        <!-- Inventory Page Header -->
+        <div class="view-header-title">
+          <h2>📑 Equipment Inventory Directory</h2>
+          <p>Filter, search, and monitor clinical equipment assets across all hospital wings.</p>
         </div>
-      </section>
+
+        <!-- Horizontal Filter Pills Toolbar -->
+        <div class="eq-pill-grid" style="margin-bottom: 1.25rem;">
+          <button type="button" class="eq-pill-btn active" data-filter-type="ALL">All Items</button>
+          <button type="button" class="eq-pill-btn" data-filter-type="biomedTag">Biomed Tag</button>
+          <button type="button" class="eq-pill-btn" data-filter-type="serialNumber">Serial Number</button>
+          <button type="button" class="eq-pill-btn" data-filter-type="pcNumber">PC Number</button>
+          <button type="button" class="eq-pill-btn" data-filter-type="equipment">Equipment</button>
+          <button type="button" class="eq-pill-btn" data-filter-type="grouping">Group of Equipment</button>
+          <button type="button" class="eq-pill-btn" data-filter-type="location">Area</button>
+          <button type="button" class="eq-pill-btn" data-filter-type="ipmSchedule">IPM Schedule</button>
+        </div>
+
+        <!-- Equipment Inventory Search & Filter Toolbar -->
+        <section class="toolbar">
+          <div class="search-box">
+            <input type="text" id="eqSearchInput" placeholder="🔍 Search equipment directory by tag, serial, or room..." />
+          </div>
+          <div class="filter-box">
+            <select id="eqAreaFilter">
+              <option value="ALL">All Hospital Areas</option>
+              <option value="ICU">ICU</option>
+              <option value="OR">OR Suite</option>
+              <option value="Emergency">Emergency Room</option>
+              <option value="Cardiology">Cardiology</option>
+              <option value="NICU">NICU</option>
+            </select>
+          </div>
+          <div class="action-buttons">
+            <button type="button" class="btn btn-primary" id="btnQuickAddEquipment">➕ Add Equipment</button>
+          </div>
+        </section>
+
+        <!-- Dedicated Full-Width Equipment Inventory Table -->
+        <section class="table-container">
+          <table class="inventory-table">
+            <thead>
+              <tr>
+                <th>Biomed Tag</th>
+                <th>Equipment Name</th>
+                <th>Serial Number</th>
+                <th>PC Number</th>
+                <th>Group</th>
+                <th>Area / Room</th>
+                <th>IPM Schedule</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="equipmentTableBody">
+              <!-- Dynamically populated from script.js -->
+            </tbody>
+          </table>
+        </section>
+      </div>
+      <!-- ================= END VIEW 2: EQUIPMENT INVENTORY ================= -->
+
     </main>
   </div>
+  <!-- ================= END MAIN CONTENT AREA ================= -->
+
+</div>
+<!-- ================= END APPLICATION LAYOUT ================= -->
 
   <!-- ================= MODAL 1: ADD / EDIT ASSET ================= -->
   <div id="itemModal" class="modal-overlay hidden">
