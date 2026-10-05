@@ -347,16 +347,24 @@ function setTypeFilterTab(type) {
     currentTypeTab = type;
   }
 
-  // Visual card highlighting
-  cardMachines.style.outline = currentTypeTab === "Machine" ? "2px solid var(--primary)" : "none";
-  cardParts.style.outline = currentTypeTab === "Part" ? "2px solid var(--secondary)" : "none";
+  // Visual card highlighting (with safe checks)
+  if (cardMachines) {
+    cardMachines.style.outline = currentTypeTab === "Machine" ? "2px solid var(--primary)" : "none";
+  }
+  if (cardParts) {
+    cardParts.style.outline = currentTypeTab === "Part" ? "2px solid var(--secondary)" : "none";
+  }
 
   renderTable();
 }
 
-cardMachines.addEventListener("click", () => setTypeFilterTab("Machine"));
-cardParts.addEventListener("click", () => setTypeFilterTab("Part"));
-
+// SAFE EVENT LISTENERS (Prevents line 277 crash)
+if (cardMachines) {
+  cardMachines.addEventListener("click", () => setTypeFilterTab("Machine"));
+}
+if (cardParts) {
+  cardParts.addEventListener("click", () => setTypeFilterTab("Part"));
+}
 // ================= TABLE RENDERING =================
 function renderTable() {
   const q = searchInput.value.toLowerCase().trim();
