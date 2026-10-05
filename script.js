@@ -274,7 +274,9 @@ signupForm.addEventListener("submit", async (e) => {
 });
 
 // Sign Out Handler
-logoutBtn.addEventListener("click", () => signOut(auth));
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", () => signOut(auth));
+}
 
 // ================= SESSION MONITOR =================
 onAuthStateChanged(auth, async (user) => {
