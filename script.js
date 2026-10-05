@@ -839,6 +839,36 @@ document.querySelectorAll(".eq-pill-btn").forEach((btn) => {
   });
 });
 
+// ================= EQUIPMENT INVENTORY TOGGLE & SCROLL =================
+const eqToggleHeader = document.getElementById("eqToggleHeader");
+const eqDropdownList = document.getElementById("eqDropdownList");
+const eqArrowIcon = document.getElementById("eqArrowIcon");
+
+if (eqToggleHeader && eqDropdownList) {
+  eqToggleHeader.addEventListener("click", () => {
+    eqDropdownList.classList.toggle("hidden");
+    if (eqArrowIcon) {
+      eqArrowIcon.textContent = eqDropdownList.classList.contains("hidden") ? "►" : "▼";
+    }
+  });
+}
+
+document.querySelectorAll(".eq-pill-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".eq-pill-btn").forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    const targetType = btn.getAttribute("data-filter-type");
+    if (targetType === "ALL") {
+      searchInput.value = "";
+      renderTable();
+    } else {
+      searchInput.placeholder = `Filtering by ${btn.textContent.trim()}...`;
+      searchInput.focus();
+    }
+  });
+});
+
 // ================= IT ADMIN: BACKUP & ACCOUNTS =================
 window.exportDatabaseBackup = function () {
   const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(inventory, null, 2));
