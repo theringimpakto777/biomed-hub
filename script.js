@@ -838,6 +838,112 @@ document.querySelectorAll(".eq-pill-btn").forEach((btn) => {
   });
 });
 
+// ==========================================================================
+// SIDEBAR NAVIGATION & VIEW SWITCHER (OPTION 1)
+// ==========================================================================
+const navDashboard = document.getElementById("navDashboard");
+const navInventory = document.getElementById("navInventory");
+const navSpareParts = document.getElementById("navSpareParts");
+
+const viewDashboard = document.getElementById("viewDashboard");
+const viewInventory = document.getElementById("viewInventory");
+const pageTitleDisplay = document.getElementById("pageTitleDisplay");
+
+// Helper function to switch active tab styling and toggle views
+function setActiveView(activeNavBtn, targetView, titleText) {
+  // 1. Reset all sidebar buttons to inactive
+  document.querySelectorAll(".sidebar-nav-btn").forEach(btn => btn.classList.remove("active"));
+  
+  // 2. Set chosen sidebar button as active
+  if (activeNavBtn) activeNavBtn.classList.add("active");
+
+  // 3. Hide all views
+  if (viewDashboard) viewDashboard.classList.add("hidden");
+  if (viewInventory) viewInventory.classList.add("hidden");
+
+  // 4. Show the selected view
+  if (targetView) targetView.classList.remove("hidden");
+
+  // 5. Update top header title
+  if (pageTitleDisplay) pageTitleDisplay.textContent = titleText;
+}
+
+// Event Listener: Click Dashboard
+if (navDashboard) {
+  navDashboard.addEventListener("click", () => {
+    setActiveView(navDashboard, viewDashboard, "Dashboard Overview");
+  });
+}
+
+// Event Listener: Click Equipment Inventory
+if (navInventory) {
+  navInventory.addEventListener("click", () => {
+    setActiveView(navInventory, viewInventory, "Equipment Inventory Directory");
+    renderEquipmentTable(); // Render equipment table when opening this view
+  });
+}
+
+// Event Listener: Click Spare Parts (Navigates to Dashboard & auto-filters to parts)
+if (navSpareParts) {
+  navSpareParts.addEventListener("click", () => {
+    setActiveView(navSpareParts, viewDashboard, "Spare Parts Registry");
+    const statusSelect = document.getElementById("statusFilter");
+    if (statusSelect) {
+      searchInput.value = "Part";
+      renderTable();
+    }
+  });
+}
+
+// Quick filter clicks for Equipment Inventory Pills
+document.querySelectorAll("#viewInventory .eq-pill-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("#viewInventory .eq-pill-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    const targetType = btn.getAttribute("data-filter-type");
+    const eqSearch = document.getElementById("eqSearchInput");
+    if (eqSearch) {
+      if (targetType === "ALL") {
+        eqSearch.value = "";
+      } else {
+        eqSearch.placeholder = `Filtering directory by ${btn.textContent.trim()}...`;
+        eqSearch.focus();
+      }
+    }
+  });
+});
+
+// Function to populate the Equipment Inventory Table
+function renderEquipmentTable() {
+  const tbody = document.getElementById("equipmentTableBody");
+  if (!tbody) return;
+
+  // Filter only machine/equipment assets from your inventory list
+  const equipmentItems = inventoryData.filter(item => item.type === "MACHINE" || !item.type);
+
+  if (equipmentItems.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="9" class="empty-state">No equipment records found.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = equipmentItems.map(item => `
+    <tr>
+      <td><span class="badge-biomed-tag" onclick="openDetailModal('${item.id}')">${item.tag || item.biomedTag || 'N/A'}</span></td>
+      <td><strong>${item.name || item.equipment || 'Unnamed Equipment'}</strong></td>
+      <td>${item.serialNumber || item.sn || '-'}</td>
+      <td>${item.pcNumber || '-'}</td>
+      <td><span class="badge badge-machine">${item.grouping || item.group || 'General'}</span></td>
+      <td>${item.location || item.area || '-'}</td>
+      <td>${item.ipmSchedule || 'Quarterly'}</td>
+      <td><span class="badge ${item.status === 'APPROVED' ? 'badge-approved' : 'badge-pending'}">${item.status || 'Active'}</span></td>
+      <td>
+        <button class="btn btn-outline btn-sm" onclick="openDetailModal('${item.id}')">Dossier</button>
+      </td>
+    </tr>
+  `).join("");
+}
+
 // ================= IT ADMIN: BACKUP & ACCOUNTS =================
 window.exportDatabaseBackup = function () {
   const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(inventory, null, 2));
