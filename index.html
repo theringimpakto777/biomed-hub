@@ -129,13 +129,14 @@
         </div>
       </section>
 
-      <!-- ================= EQUIPMENT INVENTORY SIDEBAR / FILTER PANEL ================= -->
+<!-- ================= EQUIPMENT INVENTORY DROPDOWN ================= -->
 <section class="eq-inventory-container">
-  <div class="eq-inventory-header">
+  <div class="eq-inventory-header" id="eqToggleHeader">
     <span class="eq-header-icon">📑</span>
     <h3>Equipment Inventory</h3>
+    <span id="eqArrowIcon" class="eq-arrow">▼</span>
   </div>
-  <div class="eq-inventory-body">
+  <div class="eq-inventory-body" id="eqDropdownList">
     <div class="eq-pill-grid">
       <button type="button" class="eq-pill-btn active" data-filter-type="ALL">All Items</button>
       <button type="button" class="eq-pill-btn" data-filter-type="biomedTag">Biomed Tag</button>
