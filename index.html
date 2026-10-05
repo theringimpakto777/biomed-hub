@@ -130,14 +130,19 @@
       </div>
     </header>
 
-    <!-- IT Admin Banner (Keeps your admin functions intact) -->
+   <!-- IT Admin Banner (Includes Passcode & Account Management) -->
     <div id="itAdminBanner" class="it-banner hidden">
       <div class="it-banner-content">
         <span>🛡️ IT Administrator Mode Active</span>
-        <button type="button" class="btn btn-sm btn-it" id="btnBackupDb">Backup Firestore</button>
+        <div style="display: flex; gap: 0.5rem;">
+          <!-- Button to open the Passcode / Accounts Modal -->
+          <button type="button" class="btn btn-sm btn-it-outline" id="btnOpenAccounts" onclick="openAccountsModal()">👥 Manage Users & Passcodes</button>
+          <!-- Button to trigger Firestore JSON Backup -->
+          <button type="button" class="btn btn-sm btn-it" id="btnBackupDb" onclick="exportDatabaseBackup()">Backup Firestore</button>
+        </div>
       </div>
     </div>
-
+    
     <main class="app-main">
       <!-- ================= VIEW 1: DASHBOARD (Active by default) ================= -->
       <div id="viewDashboard">
