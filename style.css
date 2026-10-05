@@ -501,3 +501,68 @@ body {
   border-radius: 6px;
   background: #000;
 }
+/* Equipment Inventory Panel */
+.eq-inventory-container {
+  background: #ffffff;
+  border: 1px solid #dcfce7;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.eq-inventory-header {
+  background: #eaf8ee;
+  border-bottom: 1px solid #d1fae5;
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.eq-header-icon {
+  font-size: 1.1rem;
+}
+
+.eq-inventory-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #166534;
+  margin: 0;
+}
+
+.eq-inventory-body {
+  padding: 1rem 1.25rem;
+}
+
+.eq-pill-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 260px;
+}
+
+.eq-pill-btn {
+  background: #eaf8ee;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  padding: 0.55rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.eq-pill-btn:hover {
+  background: #dcfce7;
+  border-color: #86efac;
+}
+
+.eq-pill-btn.active {
+  background: #16a34a;
+  color: #ffffff;
+  border-color: #15803d;
+  font-weight: 600;
+}

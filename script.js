@@ -886,3 +886,20 @@ window.deleteUserAccount = async function (uid) {
     loadAdminTables();
   }
 };
+// Equipment Inventory Quick Filter Handling
+document.querySelectorAll(".eq-pill-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".eq-pill-btn").forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    const targetType = btn.getAttribute("data-filter-type");
+    if (targetType === "ALL") {
+      searchInput.value = "";
+      renderTable();
+    } else {
+      // Focus search input and label prompt for selected column
+      searchInput.placeholder = `Filtering by ${btn.textContent.trim()}...`;
+      searchInput.focus();
+    }
+  });
+});
