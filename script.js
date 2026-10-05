@@ -55,21 +55,21 @@ let videoStream = null;
 
 // ================= DOM ELEMENTS =================
 const authScreen = document.getElementById("authScreen");
-const mainApp = document.getElementById("mainApp");
+const mainApp = document.getElementById("appContainer"); // Updated to match index.html
 const authAlert = document.getElementById("authAlert");
 const loginForm = document.getElementById("loginForm");
 const signupForm = document.getElementById("signupForm");
 const tabLoginBtn = document.getElementById("tabLoginBtn");
 const tabSignupBtn = document.getElementById("tabSignupBtn");
-const userBadge = document.getElementById("userBadge");
-const logoutBtn = document.getElementById("logoutBtn");
+const userBadge = document.getElementById("userDisplayName"); // Updated to match index.html
+const logoutBtn = document.getElementById("btnSignOut"); // Updated to match index.html
 const itAdminBanner = document.getElementById("itAdminBanner");
 const biomedActionButtons = document.getElementById("biomedActionButtons");
 
 // KPIs
-const kpiMachines = document.getElementById("kpiMachines");
-const kpiParts = document.getElementById("kpiParts");
-const kpiPending = document.getElementById("kpiPending");
+const kpiMachines = document.getElementById("kpiActiveMachines"); // Updated to match index.html
+const kpiParts = document.getElementById("kpiSpareParts"); // Updated to match index.html
+const kpiPending = document.getElementById("kpiPendingApproval"); // Updated to match index.html
 const cardMachines = document.getElementById("cardMachines");
 const cardParts = document.getElementById("cardParts");
 
@@ -87,8 +87,8 @@ const editItemId = document.getElementById("editItemId");
 const formItemType = document.getElementById("formItemType");
 const machineFormFields = document.getElementById("machineFormFields");
 const partFormFields = document.getElementById("partFormFields");
-const btnAddMachine = document.getElementById("btnAddMachine");
-const btnAddPart = document.getElementById("btnAddPart");
+const btnAddMachine = document.getElementById("btnRegisterMachine"); // Updated to match index.html
+const btnAddPart = document.getElementById("btnRegisterPart"); // Updated to match index.html
 const closeItemModalBtn = document.getElementById("closeItemModalBtn");
 const cancelItemModalBtn = document.getElementById("cancelItemModalBtn");
 
